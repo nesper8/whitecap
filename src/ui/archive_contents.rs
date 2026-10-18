@@ -35,12 +35,7 @@ pub(super) fn entries_in_directory(entries: &[ArchiveEntry], directory: &str) ->
     }
 
     let mut children = children.into_values().collect::<Vec<_>>();
-    children.sort_by(|left, right| {
-        right
-            .is_dir
-            .cmp(&left.is_dir)
-            .then_with(|| left.path.to_lowercase().cmp(&right.path.to_lowercase()))
-    });
+    children.sort_by_cached_key(|entry| (!entry.is_dir, entry.path.to_lowercase()));
     children
 }
 

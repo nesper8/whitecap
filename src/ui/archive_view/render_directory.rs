@@ -16,11 +16,12 @@ pub(crate) fn render_directory(
     up_button: &gtk::Button,
     archive_name: &str,
 ) {
-    let (current_directory, entries) = {
+    let (current_directory, visible_entries) = {
         let state = state.borrow();
-        (state.current_directory.clone(), state.entries.clone())
+        let current_directory = state.current_directory.clone();
+        let visible_entries = entries_in_directory(&state.entries, &current_directory);
+        (current_directory, visible_entries)
     };
-    let visible_entries = entries_in_directory(&entries, &current_directory);
 
     while let Some(child) = list.first_child() {
         list.remove(&child);

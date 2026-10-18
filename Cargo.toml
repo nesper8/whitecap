@@ -19,5 +19,5 @@ sevenz-rust2 = "0.24"
 tempfile = "3"
 unrar-rs = "0.12"
 xz2 = "0.1"
-zip = { version = "4", default-features = false, features = ["deflate"] }
+zip = { version = "4", default-features = false, features = ["deflate-flate2"] }
 zstd = "0.13"

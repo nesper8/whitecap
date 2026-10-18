@@ -1,145 +1,21 @@
-use std::{
-    error::Error,
-    fs::{self, File},
-    io::{self, Write},
-    path::Path,
-};
+mod add;
+mod delete;
+mod extract;
+mod load;
+mod map_password_error;
 
-use super::{
-    ArchiveEntry,
-    delete,
-    path,
-    rewrite,
-    sources::SourceEntry,
-};
-
-pub(super) fn load(path: &Path) -> Result<Vec<ArchiveEntry>, Box<dyn Error>> {
-    let mut archive = ::zip::ZipArchive::new(File::open(path)?)?;
-    let mut entries = Vec::with_capacity(archive.len());
-    for index in 0..archive.len() {
-        let entry = archive.by_index_raw(index)?;
-        entries.push(ArchiveEntry {
-            path: path::normalize(entry.name()),
-            is_dir: entry.is_dir(),
-            size: entry.size(),
-            encrypted: entry.encrypted(),
-        });
-    }
-    Ok(entries)
-}
-
-pub(super) fn extract(
-    archive_path: &Path,
-    destination: &Path,
-    selected: &[(String, bool)],
-    password: Option<&str>,
-) -> Result<usize, Box<dyn Error>> {
-    let mut archive = ::zip::ZipArchive::new(File::open(archive_path)?)?;
-    let mut count = 0;
-    for index in 0..archive.len() {
-        let relative_path = {
-            let entry = archive.by_index_raw(index)?;
-            let Some(relative_path) = entry.enclosed_name() else {
-                continue;
-            };
-            let relative = path::normalize(&relative_path.to_string_lossy());
-            if !path::is_selected(&relative, selected) {
-                continue;
-            }
-            relative_path
-        };
-        let mut entry = match password {
-            Some(password) => archive
-                .by_index_decrypt(index, password.as_bytes())
-                .map_err(map_password_error)?,
-            None => match archive.by_index(index) {
-                Ok(entry) => entry,
-                Err(::zip::result::ZipError::UnsupportedArchive(
-                    ::zip::result::ZipError::PASSWORD_REQUIRED,
-                )) => return Err(super::PasswordError::Required.into()),
-                Err(error) => return Err(error.into()),
-            },
-        };
-        let output = destination.join(relative_path);
-        if entry.is_dir() {
-            fs::create_dir_all(output)?;
-        } else {
-            if let Some(parent) = output.parent() {
-                fs::create_dir_all(parent)?;
-            }
-            let mut file = File::create(output)?;
-            io::copy(&mut entry, &mut file)?;
-            file.flush()?;
-        }
-        count += 1;
-    }
-    Ok(count)
-}
-
-fn map_password_error(error: ::zip::result::ZipError) -> Box<dyn Error> {
-    match error {
-        ::zip::result::ZipError::UnsupportedArchive(::zip::result::ZipError::PASSWORD_REQUIRED) => {
-            super::PasswordError::Required.into()
-        }
-        ::zip::result::ZipError::InvalidPassword => super::PasswordError::Invalid.into(),
-        error => error.into(),
-    }
-}
-
-pub(super) fn add(archive_path: &Path, additions: &[SourceEntry]) -> Result<(), Box<dyn Error>> {
-    let mut temporary = rewrite::replacement_file(archive_path)?;
-    io::copy(&mut File::open(archive_path)?, temporary.as_file_mut())?;
-
-    let mut writer = ::zip::ZipWriter::new_append(temporary.reopen()?)?;
-    let options = ::zip::write::SimpleFileOptions::default();
-    for entry in additions {
-        if entry.is_dir {
-            writer.add_directory(
-                entry.archive_path.trim_end_matches('/'),
-                options,
-            )?;
-        } else {
-            writer.start_file(&entry.archive_path, options)?;
-            io::copy(&mut File::open(&entry.source)?, &mut writer)?;
-        }
-    }
-    writer.finish()?.flush()?;
-    temporary.persist(archive_path)?;
-    Ok(())
-}
-
-pub(super) fn delete(
-    archive_path: &Path,
-    selected: &[(String, bool)],
-) -> Result<usize, Box<dyn Error>> {
-    let temporary = rewrite::replacement_file(archive_path)?;
-    let mut archive = ::zip::ZipArchive::new(File::open(archive_path)?)?;
-    let mut writer = ::zip::ZipWriter::new(temporary.reopen()?);
-    let mut count = 0;
-
-    for index in 0..archive.len() {
-        let entry = archive.by_index_raw(index)?;
-        let entry_path = path::normalize(entry.name());
-        if delete::is_selected(&entry_path, selected) {
-            count += 1;
-        } else {
-            writer.raw_copy_file(entry)?;
-        }
-    }
-    if count == 0 {
-        return Err(io::Error::new(
-            io::ErrorKind::NotFound,
-            "None of the selected entries were found in the archive",
-        )
-        .into());
-    }
-    writer.finish()?.flush()?;
-    temporary.persist(archive_path)?;
-    Ok(count)
-}
+pub(super) use add::add;
+pub(super) use delete::delete;
+pub(super) use extract::extract;
+pub(super) use load::load;
 
 #[cfg(test)]
 mod tests {
+    use std::{
+        fs::{self, File},
+        io::Write,
+    };
+
     use super::*;
     use crate::archive::{add_files, delete_entries, temporary_directory};
 

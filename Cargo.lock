@@ -1798,7 +1798,7 @@ dependencies = [
 
 [[package]]
 name = "whitecap"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "bzip2 0.5.2",
  "flate2",

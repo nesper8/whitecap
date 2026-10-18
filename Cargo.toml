@@ -1,6 +1,6 @@
 [package]
 name = "whitecap"
-version = "1.2.5"
+version = "1.2.6"
 edition = "2024"
 description = "A GTK 4 archive browser for GNOME"
 license = "MIT"

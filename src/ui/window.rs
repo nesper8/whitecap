@@ -37,29 +37,43 @@ pub(super) fn build_window(app: &adw::Application, initial_archive: Option<PathB
     header.pack_end(&extract_button);
     content.append(&header);
 
-    let toolbar = gtk::Box::new(gtk::Orientation::Horizontal, 12);
-    toolbar.set_margin_start(18);
-    toolbar.set_margin_end(18);
-    toolbar.set_margin_top(12);
-    toolbar.set_margin_bottom(12);
+    let toolbar = gtk::Box::new(gtk::Orientation::Vertical, 0);
+
+    let location_bar = gtk::Box::new(gtk::Orientation::Horizontal, 12);
+    location_bar.set_margin_start(24);
+    location_bar.set_margin_end(24);
+    location_bar.set_margin_top(16);
+    location_bar.set_margin_bottom(12);
     let up_button = gtk::Button::from_icon_name("go-up-symbolic");
     up_button.set_tooltip_text(Some("Go to parent folder"));
     up_button.set_sensitive(false);
-    toolbar.append(&up_button);
     let archive_label = gtk::Label::new(Some("Drop an archive here, or open one"));
     archive_label.set_xalign(0.0);
     archive_label.set_hexpand(true);
     archive_label.add_css_class("dim-label");
+    location_bar.append(&archive_label);
+    toolbar.append(&location_bar);
+    let row_separator = gtk::Separator::new(gtk::Orientation::Horizontal);
+    toolbar.append(&row_separator);
+
+    let action_bar = gtk::Box::new(gtk::Orientation::Horizontal, 12);
+    action_bar.set_margin_start(24);
+    action_bar.set_margin_end(24);
+    action_bar.set_margin_top(8);
+    action_bar.set_margin_bottom(8);
+    action_bar.append(&up_button);
+    action_bar.append(&gtk::Separator::new(gtk::Orientation::Vertical));
     let search = gtk::SearchEntry::new();
     search.set_placeholder_text(Some("Search contents"));
     search.set_width_chars(24);
-    toolbar.append(&archive_label);
-    toolbar.append(&search);
-    toolbar.append(&gtk::Separator::new(gtk::Orientation::Vertical));
+    search.set_hexpand(true);
+    action_bar.append(&search);
+    action_bar.append(&gtk::Separator::new(gtk::Orientation::Vertical));
     let delete_button = gtk::Button::from_icon_name("user-trash-symbolic");
     delete_button.set_tooltip_text(Some("Delete selected entries"));
     delete_button.set_sensitive(false);
-    toolbar.append(&delete_button);
+    action_bar.append(&delete_button);
+    toolbar.append(&action_bar);
     content.append(&toolbar);
     content.append(&gtk::Separator::new(gtk::Orientation::Horizontal));
 

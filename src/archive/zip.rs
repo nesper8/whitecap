@@ -5,7 +5,13 @@ use std::{
     path::Path,
 };
 
-use super::{ArchiveEntry, add::{self, SourceEntry}, delete, path};
+use super::{
+    ArchiveEntry,
+    delete,
+    path,
+    rewrite,
+    sources::SourceEntry,
+};
 
 pub(super) fn load(path: &Path) -> Result<Vec<ArchiveEntry>, Box<dyn Error>> {
     let mut archive = ::zip::ZipArchive::new(File::open(path)?)?;
@@ -81,7 +87,7 @@ fn map_password_error(error: ::zip::result::ZipError) -> Box<dyn Error> {
 }
 
 pub(super) fn add(archive_path: &Path, additions: &[SourceEntry]) -> Result<(), Box<dyn Error>> {
-    let mut temporary = add::replacement_file(archive_path)?;
+    let mut temporary = rewrite::replacement_file(archive_path)?;
     io::copy(&mut File::open(archive_path)?, temporary.as_file_mut())?;
 
     let mut writer = ::zip::ZipWriter::new_append(temporary.reopen()?)?;
@@ -106,7 +112,7 @@ pub(super) fn delete(
     archive_path: &Path,
     selected: &[(String, bool)],
 ) -> Result<usize, Box<dyn Error>> {
-    let temporary = add::replacement_file(archive_path)?;
+    let temporary = rewrite::replacement_file(archive_path)?;
     let mut archive = ::zip::ZipArchive::new(File::open(archive_path)?)?;
     let mut writer = ::zip::ZipWriter::new(temporary.reopen()?);
     let mut count = 0;

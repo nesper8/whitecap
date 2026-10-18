@@ -5,7 +5,13 @@ use std::{
     path::Path,
 };
 
-use super::{ArchiveEntry, add::{self, SourceEntry}, delete, path};
+use super::{
+    ArchiveEntry,
+    delete,
+    path,
+    rewrite,
+    sources::SourceEntry,
+};
 
 #[derive(Clone, Copy)]
 pub(super) enum Compression {
@@ -70,7 +76,7 @@ pub(super) fn add(
     additions: &[SourceEntry],
     compression: Compression,
 ) -> Result<(), Box<dyn Error>> {
-    let output = add::replacement_file(archive_path)?;
+    let output = rewrite::replacement_file(archive_path)?;
 
     if matches!(compression, Compression::None) {
         let mut builder = ::tar::Builder::new(output.reopen()?);
@@ -95,7 +101,7 @@ pub(super) fn delete(
     selected: &[(String, bool)],
     compression: Compression,
 ) -> Result<usize, Box<dyn Error>> {
-    let output = add::replacement_file(archive_path)?;
+    let output = rewrite::replacement_file(archive_path)?;
     let mut count = 0;
     if matches!(compression, Compression::None) {
         let mut builder = ::tar::Builder::new(output.reopen()?);

@@ -5,7 +5,13 @@ use std::{
     path::Path,
 };
 
-use super::{ArchiveEntry, add::{self, SourceEntry}, delete, path};
+use super::{
+    ArchiveEntry,
+    delete,
+    path,
+    rewrite,
+    sources::SourceEntry,
+};
 
 pub(super) fn load_with_password(
     path: &Path,
@@ -88,7 +94,7 @@ fn map_password_error(
 }
 
 pub(super) fn add(archive_path: &Path, additions: &[SourceEntry]) -> Result<(), Box<dyn Error>> {
-    let temporary = add::replacement_file(archive_path)?;
+    let temporary = rewrite::replacement_file(archive_path)?;
     let mut writer = sevenz_rust2::ArchiveWriter::create(temporary.path())?;
     let mut reader = sevenz_rust2::ArchiveReader::open(
         archive_path,
@@ -116,7 +122,7 @@ pub(super) fn delete(
     archive_path: &Path,
     selected: &[(String, bool)],
 ) -> Result<usize, Box<dyn Error>> {
-    let temporary = add::replacement_file(archive_path)?;
+    let temporary = rewrite::replacement_file(archive_path)?;
     let mut writer = sevenz_rust2::ArchiveWriter::create(temporary.path())?;
     let mut reader = sevenz_rust2::ArchiveReader::open(
         archive_path,

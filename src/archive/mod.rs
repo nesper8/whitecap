@@ -8,7 +8,9 @@ mod operations;
 mod path;
 mod password;
 mod rar;
+mod rewrite;
 mod sevenz;
+mod sources;
 mod tar;
 mod zip;
 #[cfg(test)]

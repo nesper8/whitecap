@@ -14,14 +14,10 @@ permissions:
 
 jobs:
   package:
-    name: Build ${{ matrix.format }} package
+    name: Build Linux packages
     runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - format: deb
-          - format: rpm
+    permissions:
+      contents: write
 
     steps:
       - name: Check out source
@@ -54,7 +50,6 @@ jobs:
           echo "architecture=$(dpkg --print-architecture)" >> "$GITHUB_OUTPUT"
 
       - name: Build Debian package
-        if: matrix.format == 'deb'
         env:
           VERSION: ${{ steps.package.outputs.version }}
           ARCHITECTURE: ${{ steps.package.outputs.architecture }}
@@ -122,7 +117,6 @@ jobs:
             "dist/whitecap_${VERSION}_${ARCHITECTURE}.deb"
 
       - name: Build RPM package
-        if: matrix.format == 'rpm'
         env:
           VERSION: ${{ steps.package.outputs.version }}
         run: |
@@ -174,37 +168,14 @@ jobs:
           mkdir -p dist
           find "$rpm_root/RPMS" -type f -name '*.rpm' -exec cp {} dist/ \;
 
-      - name: Upload package artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: whitecap-${{ matrix.format }}
-          path: dist/*
-          if-no-files-found: error
-
-  release:
-    name: Publish GitHub release
-    if: >-
-      needs.package.result == 'success' &&
-      (
-        github.ref == format('refs/heads/{0}', github.event.repository.default_branch) ||
-        startsWith(github.ref, 'refs/tags/v')
-      )
-    needs: package
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-    steps:
-      - name: Download packages
-        uses: actions/download-artifact@v4
-        with:
-          path: dist
-          merge-multiple: true
-
-      - name: Publish release
+      - name: Publish GitHub release
+        if: >-
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch) ||
+          startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ github.ref_type == 'tag' && format('Whitecap {0}', github.ref_name) || format('Whitecap build #{0}', github.run_number) }}
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('build-{0}', github.run_number) }}
+          name: "${{ github.ref_type == 'tag' && format('Whitecap {0}', github.ref_name) || format('Whitecap build #{0}', github.run_number) }}"
+          tag_name: "${{ github.ref_type == 'tag' && github.ref_name || format('build-{0}', github.run_number) }}"
           target_commitish: ${{ github.sha }}
           prerelease: ${{ github.ref_type != 'tag' }}
           generate_release_notes: true

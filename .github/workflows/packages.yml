@@ -30,6 +30,11 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache Cargo dependencies and build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: whitecap-linux
+
       - name: Install build dependencies
         run: |
           sudo apt-get update

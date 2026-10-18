@@ -19,6 +19,7 @@ use super::{
 
 pub(super) fn connect_archive_drop(
     address_bar: &impl gtk::prelude::IsA<gtk::Widget>,
+    window: &adw::ApplicationWindow,
     overlay: &adw::ToastOverlay,
     state: &SharedState,
     list: &gtk::ListBox,
@@ -29,6 +30,7 @@ pub(super) fn connect_archive_drop(
     up_button: &gtk::Button,
 ) {
     let overlay = overlay.clone();
+    let window = window.clone();
     let drop_overlay = overlay.clone();
     let state = state.clone();
     let list = list.clone();
@@ -41,6 +43,7 @@ pub(super) fn connect_archive_drop(
         if let Some(path) = paths.first() {
             load_dropped_archive(
                 path,
+                &window,
                 &overlay,
                 &state,
                 &list,
@@ -95,26 +98,30 @@ pub(super) fn connect_add_files_drop(
             }
         }
         match archive::add_files(&archive_path, &paths) {
-            Ok(count) => match archive::load(&archive_path) {
-                Ok(entries) => {
-                    archive_view::show_archive(
-                        &archive_path,
-                        entries,
-                        &state,
-                        &list,
-                        &stack,
-                        &title,
-                        &archive_label,
-                        &extract_button,
-                        &up_button,
-                    );
-                    overlay.add_toast(adw::Toast::new(&format!(
-                        "Added {count} archive {}",
-                        if count == 1 { "entry" } else { "entries" }
-                    )));
+            Ok(count) => {
+                let password = state.borrow().archive_password.clone();
+                match archive::load_with_password(&archive_path, password.as_deref()) {
+                    Ok(entries) => {
+                        archive_view::show_archive(
+                            &archive_path,
+                            entries,
+                            password,
+                            &state,
+                            &list,
+                            &stack,
+                            &title,
+                            &archive_label,
+                            &extract_button,
+                            &up_button,
+                        );
+                        overlay.add_toast(adw::Toast::new(&format!(
+                            "Added {count} archive {}",
+                            if count == 1 { "entry" } else { "entries" }
+                        )));
+                    }
+                    Err(error) => show_error(&overlay, error),
                 }
-                Err(error) => show_error(&overlay, error),
-            },
+            }
             Err(error) => show_error(&overlay, error),
         }
     });
@@ -123,6 +130,7 @@ pub(super) fn connect_add_files_drop(
 
 pub(super) fn load_dropped_archive(
     path: &Path,
+    window: &adw::ApplicationWindow,
     overlay: &adw::ToastOverlay,
     state: &SharedState,
     list: &gtk::ListBox,
@@ -132,20 +140,18 @@ pub(super) fn load_dropped_archive(
     extract_button: &gtk::Button,
     up_button: &gtk::Button,
 ) {
-    match archive::load(path) {
-        Ok(entries) => archive_view::show_archive(
-            path,
-            entries,
-            state,
-            list,
-            stack,
-            title,
-            archive_label,
-            extract_button,
-            up_button,
-        ),
-        Err(error) => show_error(overlay, error),
-    }
+    archive_view::open_archive(
+        path,
+        window,
+        overlay,
+        state,
+        list,
+        stack,
+        title,
+        archive_label,
+        extract_button,
+        up_button,
+    );
 }
 
 pub(super) fn create_drag_export(
@@ -153,7 +159,7 @@ pub(super) fn create_drag_export(
     list: &gtk::ListBox,
     dragged_index: usize,
 ) -> Result<gdk::ContentProvider, Box<dyn Error>> {
-    let (archive_path, selected) = {
+    let (archive_path, selected, password) = {
         let state = state.borrow();
         let archive_path = state
             .archive_path
@@ -183,7 +189,7 @@ pub(super) fn create_drag_export(
             .filter_map(|index| state.visible_entries.get(index))
             .map(|entry| (entry.path.clone(), entry.is_dir))
             .collect::<Vec<_>>();
-        (archive_path, selected)
+        (archive_path, selected, state.archive_password.clone())
     };
 
     if selected.is_empty() {
@@ -193,7 +199,12 @@ pub(super) fn create_drag_export(
     let export_directory = tempfile::Builder::new()
         .prefix("whitecap-drag-")
         .tempdir()?;
-    archive::extract(&archive_path, export_directory.path(), &selected)?;
+    archive::extract_with_password(
+        &archive_path,
+        export_directory.path(),
+        &selected,
+        password.as_deref(),
+    )?;
 
     let files = selected
         .iter()

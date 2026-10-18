@@ -22,6 +22,7 @@ pub(super) fn load(path: &Path) -> Result<Vec<ArchiveEntry>, Box<dyn Error>> {
             path: normalized_entry_path(&header.filename),
             is_dir: header.is_directory(),
             size: header.original_size,
+            encrypted: header.is_encrypted(),
         });
         archive.skip(&header)?;
     }
@@ -32,9 +33,13 @@ pub(super) fn extract(
     archive_path: &Path,
     destination: &Path,
     selected: &[(String, bool)],
+    password: Option<&str>,
 ) -> Result<usize, Box<dyn Error>> {
     let mut archive = AceArchive::new(File::open(archive_path)?)?;
     ensure_supported_archive(&archive)?;
+    if let Some(password) = password {
+        archive.set_password(password);
+    }
     let solid = archive.is_solid();
     let mut count = 0;
 
@@ -56,6 +61,9 @@ pub(super) fn extract(
             archive.skip(&header)?;
             continue;
         }
+        if selected_entry && header.is_encrypted() && password.is_none() {
+            return Err(super::PasswordError::Required.into());
+        }
         if header.original_size > MAX_ENTRY_SIZE {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidData,
@@ -67,7 +75,9 @@ pub(super) fn extract(
             .into());
         }
 
-        let data = archive.read(&header)?;
+        let data = archive
+            .read(&header)
+            .map_err(|error| map_password_error(error, password.is_some()))?;
         if selected_entry {
             let output = destination.join(safe_relative_path(&header.filename)?);
             if let Some(parent) = output.parent() {
@@ -91,12 +101,6 @@ fn ensure_supported_archive<R: io::Read + io::Seek>(
             "Multi-volume ACE archives are not supported",
         ));
     }
-    if main_header.is_encrypted() {
-        return Err(io::Error::new(
-            io::ErrorKind::Unsupported,
-            "Password-protected ACE archives are not supported",
-        ));
-    }
     Ok(())
 }
 
@@ -107,13 +111,25 @@ fn ensure_supported_entry(header: &unarc_rs::ace::FileHeader) -> io::Result<()> 
             "Multi-volume ACE entries are not supported",
         ));
     }
-    if header.is_encrypted() {
-        return Err(io::Error::new(
-            io::ErrorKind::Unsupported,
-            "Password-protected ACE entries are not supported",
-        ));
-    }
     Ok(())
+}
+
+fn map_password_error(
+    error: unarc_rs::error::ArchiveError,
+    password_was_provided: bool,
+) -> Box<dyn Error> {
+    match error {
+        unarc_rs::error::ArchiveError::EncryptionRequired { .. } => {
+            super::PasswordError::Required.into()
+        }
+        unarc_rs::error::ArchiveError::InvalidPassword { .. }
+        | unarc_rs::error::ArchiveError::CrcMismatch { .. }
+            if password_was_provided =>
+        {
+            super::PasswordError::Invalid.into()
+        }
+        error => error.into(),
+    }
 }
 
 fn safe_relative_path(name: &str) -> io::Result<PathBuf> {
@@ -182,7 +198,7 @@ mod tests {
         let destination = root.join("output");
         fs::create_dir_all(&destination).unwrap();
         let selected = vec![("hello.txt".to_owned(), false)];
-        assert_eq!(extract(&archive_path, &destination, &selected).unwrap(), 1);
+        assert_eq!(extract(&archive_path, &destination, &selected, None).unwrap(), 1);
         assert_eq!(fs::read(destination.join("hello.txt")).unwrap(), b"hello");
         fs::remove_dir_all(root).unwrap();
     }

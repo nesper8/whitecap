@@ -1,6 +1,6 @@
 [package]
 name = "whitecap"
-version = "0.1.0"
+version = "v1.1"
 edition = "2024"
 
 [dependencies]

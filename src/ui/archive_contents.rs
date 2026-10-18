@@ -23,6 +23,7 @@ pub(super) fn entries_in_directory(entries: &[ArchiveEntry], directory: &str) ->
                 path: child_path,
                 is_dir: true,
                 size: 0,
+                encrypted: false,
             });
         } else {
             children.insert(entry.path.clone(), entry.clone());
@@ -50,16 +51,19 @@ mod tests {
                 path: "project/src/main.rs".to_owned(),
                 is_dir: false,
                 size: 120,
+                encrypted: false,
             },
             ArchiveEntry {
                 path: "project/README.md".to_owned(),
                 is_dir: false,
                 size: 80,
+                encrypted: false,
             },
             ArchiveEntry {
                 path: "LICENSE".to_owned(),
                 is_dir: false,
                 size: 40,
+                encrypted: false,
             },
         ];
 

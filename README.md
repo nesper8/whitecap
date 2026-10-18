@@ -56,6 +56,12 @@ Adding to ZIP stages a copy of the archive; adding to TAR rebuilds it, and
 adding to 7z recompresses its existing entries. Large archive updates can take
 time and require additional temporary disk space.
 
+Whitecap prompts for passwords when opening encrypted-header 7z or RAR
+archives, and when extracting encrypted ZIP (ZipCrypto), 7z, RAR, or ACE
+entries. A supplied password is kept in memory only while that archive is
+open; encrypted archive creation is not supported. WinZip AES-encrypted ZIP
+entries and password-protected FreeArc archives are not currently supported.
+
 ## Project layout
 
 - `src/main.rs` starts the application.
@@ -73,8 +79,8 @@ Whitecap does not bundle that executable; install a compatible FreeArc `unarc`
 build, such as [xredor/unarc](https://github.com/xredor/unarc), and make sure
 it is available on `PATH`.
 
-ACE support uses the `unarc-rs` library. Password-protected and multi-volume
-ACE archives are not supported, and individual entries are limited to 1 GiB.
+ACE support uses the `unarc-rs` library. Multi-volume ACE archives are not
+supported, and individual entries are limited to 1 GiB.
 
 ## RAR library notice
 

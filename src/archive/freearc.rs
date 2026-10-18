@@ -149,6 +149,7 @@ fn parse_listing(output: &str) -> Result<Vec<ListedEntry>, Box<dyn Error>> {
                 path: display_path,
                 is_dir,
                 size,
+                encrypted: false,
             },
             archive_path: path_start,
         });

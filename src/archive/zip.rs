@@ -11,11 +11,12 @@ pub(super) fn load(path: &Path) -> Result<Vec<ArchiveEntry>, Box<dyn Error>> {
     let mut archive = ::zip::ZipArchive::new(File::open(path)?)?;
     let mut entries = Vec::with_capacity(archive.len());
     for index in 0..archive.len() {
-        let entry = archive.by_index(index)?;
+        let entry = archive.by_index_raw(index)?;
         entries.push(ArchiveEntry {
             path: path::normalize(entry.name()),
             is_dir: entry.is_dir(),
             size: entry.size(),
+            encrypted: entry.encrypted(),
         });
     }
     Ok(entries)
@@ -25,18 +26,34 @@ pub(super) fn extract(
     archive_path: &Path,
     destination: &Path,
     selected: &[(String, bool)],
+    password: Option<&str>,
 ) -> Result<usize, Box<dyn Error>> {
     let mut archive = ::zip::ZipArchive::new(File::open(archive_path)?)?;
     let mut count = 0;
     for index in 0..archive.len() {
-        let mut entry = archive.by_index(index)?;
-        let Some(relative_path) = entry.enclosed_name() else {
-            continue;
+        let relative_path = {
+            let entry = archive.by_index_raw(index)?;
+            let Some(relative_path) = entry.enclosed_name() else {
+                continue;
+            };
+            let relative = path::normalize(&relative_path.to_string_lossy());
+            if !path::is_selected(&relative, selected) {
+                continue;
+            }
+            relative_path
         };
-        let relative = path::normalize(&relative_path.to_string_lossy());
-        if !path::is_selected(&relative, selected) {
-            continue;
-        }
+        let mut entry = match password {
+            Some(password) => archive
+                .by_index_decrypt(index, password.as_bytes())
+                .map_err(map_password_error)?,
+            None => match archive.by_index(index) {
+                Ok(entry) => entry,
+                Err(::zip::result::ZipError::UnsupportedArchive(
+                    ::zip::result::ZipError::PASSWORD_REQUIRED,
+                )) => return Err(super::PasswordError::Required.into()),
+                Err(error) => return Err(error.into()),
+            },
+        };
         let output = destination.join(relative_path);
         if entry.is_dir() {
             fs::create_dir_all(output)?;
@@ -51,6 +68,16 @@ pub(super) fn extract(
         count += 1;
     }
     Ok(count)
+}
+
+fn map_password_error(error: ::zip::result::ZipError) -> Box<dyn Error> {
+    match error {
+        ::zip::result::ZipError::UnsupportedArchive(::zip::result::ZipError::PASSWORD_REQUIRED) => {
+            super::PasswordError::Required.into()
+        }
+        ::zip::result::ZipError::InvalidPassword => super::PasswordError::Invalid.into(),
+        error => error.into(),
+    }
 }
 
 pub(super) fn add(archive_path: &Path, additions: &[SourceEntry]) -> Result<(), Box<dyn Error>> {
@@ -127,7 +154,7 @@ mod tests {
         let destination = root.join("output");
         fs::create_dir_all(&destination).unwrap();
         let selected = vec![("docs".to_owned(), true)];
-        extract(&archive_path, &destination, &selected).unwrap();
+        extract(&archive_path, &destination, &selected, None).unwrap();
 
         assert_eq!(
             fs::read(destination.join("docs/readme.txt")).unwrap(),
@@ -154,7 +181,7 @@ mod tests {
 
         let destination = root.join("output");
         fs::create_dir_all(&destination).unwrap();
-        extract(&archive_path, &destination, &[]).unwrap();
+        extract(&archive_path, &destination, &[], None).unwrap();
 
         assert!(!root.join("escaped.txt").exists());
         assert!(!destination.join("escaped.txt").exists());
@@ -186,7 +213,7 @@ mod tests {
         assert!(entries.iter().any(|entry| entry.path == "docs/nested/readme.txt"));
         let destination = root.join("output");
         fs::create_dir_all(&destination).unwrap();
-        extract(&archive_path, &destination, &[]).unwrap();
+        extract(&archive_path, &destination, &[], None).unwrap();
         assert_eq!(fs::read(destination.join("existing.txt")).unwrap(), b"original");
         assert_eq!(
             fs::read(destination.join("docs/nested/readme.txt")).unwrap(),

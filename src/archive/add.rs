@@ -249,6 +249,7 @@ mod tests {
             path: "readme.txt".to_owned(),
             is_dir: false,
             size: 10,
+            encrypted: false,
         }];
         let additions = vec![SourceEntry {
             source: PathBuf::new(),

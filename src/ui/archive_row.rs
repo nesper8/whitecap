@@ -60,7 +60,14 @@ pub(super) fn archive_entry_row(
                 Ok(export) => export,
                 Err(error) => {
                     if let Some(overlay) = &state.borrow().toast_overlay {
-                        show_error(overlay, error);
+                        if error.downcast_ref::<crate::archive::PasswordError>().is_some() {
+                            super::helpers::show_warning(
+                                overlay,
+                                "Use Extract to enter the archive password before dragging these entries.",
+                            );
+                        } else {
+                            show_error(overlay, error);
+                        }
                     }
                     return None;
                 }

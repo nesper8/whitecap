@@ -161,6 +161,7 @@ pub(super) fn build_window(app: &adw::Application, initial_archive: Option<PathB
     archive_view::connect_row_activation(&list, &state, &list, &archive_label, &up_button);
     drag_drop::connect_archive_drop(
         &archive_label,
+        &window,
         &overlay,
         &state,
         &list,
@@ -185,6 +186,7 @@ pub(super) fn build_window(app: &adw::Application, initial_archive: Option<PathB
     if let Some(path) = initial_archive {
         drag_drop::load_dropped_archive(
             &path,
+            &window,
             &overlay,
             &state,
             &list,

@@ -2,13 +2,106 @@ use std::path::Path;
 
 use adw::prelude::*;
 
+use crate::archive;
 use crate::archive::ArchiveEntry;
 
-use super::{archive_contents::entries_in_directory, archive_row::archive_entry_row, state::SharedState};
+use super::{
+    archive_contents::entries_in_directory,
+    archive_row::archive_entry_row,
+    helpers::show_error,
+    password_dialog::request_password,
+    state::SharedState,
+};
+
+pub(super) fn open_archive(
+    path: &Path,
+    window: &adw::ApplicationWindow,
+    overlay: &adw::ToastOverlay,
+    state: &SharedState,
+    list: &gtk::ListBox,
+    stack: &gtk::Stack,
+    title: &gtk::Label,
+    archive_label: &gtk::Label,
+    extract_button: &gtk::Button,
+    up_button: &gtk::Button,
+) {
+    load_archive(
+        path.to_path_buf(),
+        None,
+        window.clone(),
+        overlay.clone(),
+        state.clone(),
+        list.clone(),
+        stack.clone(),
+        title.clone(),
+        archive_label.clone(),
+        extract_button.clone(),
+        up_button.clone(),
+    );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn load_archive(
+    path: std::path::PathBuf,
+    password: Option<String>,
+    window: adw::ApplicationWindow,
+    overlay: adw::ToastOverlay,
+    state: SharedState,
+    list: gtk::ListBox,
+    stack: gtk::Stack,
+    title: gtk::Label,
+    archive_label: gtk::Label,
+    extract_button: gtk::Button,
+    up_button: gtk::Button,
+) {
+    match archive::load_with_password(&path, password.as_deref()) {
+        Ok(entries) => show_archive(
+            &path,
+            entries,
+            password,
+            &state,
+            &list,
+            &stack,
+            &title,
+            &archive_label,
+            &extract_button,
+            &up_button,
+        ),
+        Err(error) => match error.downcast_ref::<archive::PasswordError>() {
+            Some(password_error) => {
+                let prompt = if *password_error == archive::PasswordError::Invalid {
+                    "The password was incorrect. Try again."
+                } else {
+                    "Enter the password to open this encrypted archive."
+                };
+                let retry_window = window.clone();
+                request_password(&window, prompt, move |password| {
+                    if let Some(password) = password {
+                        load_archive(
+                            path,
+                            Some(password),
+                            retry_window,
+                            overlay,
+                            state,
+                            list,
+                            stack,
+                            title,
+                            archive_label,
+                            extract_button,
+                            up_button,
+                        );
+                    }
+                });
+            }
+            None => show_error(&overlay, error),
+        },
+    }
+}
 
 pub(super) fn show_archive(
     path: &Path,
     entries: Vec<ArchiveEntry>,
+    password: Option<String>,
     state: &SharedState,
     list: &gtk::ListBox,
     stack: &gtk::Stack,
@@ -25,6 +118,7 @@ pub(super) fn show_archive(
     {
         let mut state = state.borrow_mut();
         state.archive_path = Some(path.to_path_buf());
+        state.archive_password = password;
         state.entries = entries;
         state.visible_entries.clear();
         state.current_directory.clear();

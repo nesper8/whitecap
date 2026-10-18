@@ -5,6 +5,7 @@ use crate::archive::ArchiveEntry;
 #[derive(Default)]
 pub(super) struct AppState {
     pub(super) archive_path: Option<PathBuf>,
+    pub(super) archive_password: Option<String>,
     pub(super) entries: Vec<ArchiveEntry>,
     pub(super) visible_entries: Vec<ArchiveEntry>,
     pub(super) current_directory: String,

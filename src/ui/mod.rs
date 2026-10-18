@@ -5,6 +5,7 @@ mod archive_view;
 mod drop_transport;
 mod drag_drop;
 mod helpers;
+mod password_dialog;
 mod state;
 mod window;
 

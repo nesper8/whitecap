@@ -29,6 +29,7 @@ pub(super) fn load(
             path: path::normalize(&entry.path()?.to_string_lossy()),
             is_dir: entry.header().entry_type().is_dir(),
             size: entry.size(),
+            encrypted: false,
         });
     }
     Ok(entries)

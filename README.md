@@ -3,12 +3,14 @@
 Whitecap is a GTK 4 and libadwaita archive browser for GNOME. It provides a
 File Roller-inspired window for opening, browsing archive contents by folder,
 searching the current folder, selecting, and extracting. Drop an archive onto
-the window to open it.
+the archive location bar to open it.
 
 Double-click a folder to browse into it; use the up button to return to its
 parent. Press Ctrl+A while the contents list is focused to select all visible
 entries. Drag selected entries from the list to a file manager for quick
-extraction.
+extraction. Delete selected entries with the toolbar's trash button or the
+Delete key, then confirm the action. Selecting a folder removes its contents
+recursively.
 
 Supported formats:
 
@@ -36,13 +38,28 @@ cargo run
 The GitHub Actions workflow builds `.deb` and `.rpm` packages on pushes, pull
 requests, and manual runs. Download them from the run's **Artifacts** section.
 The packages install Whitecap and its desktop launcher, and require GTK 4.10
-and libadwaita 1.5 or newer. FreeArc extraction additionally requires the
-separate `unarc` executable on `PATH`.
+and libadwaita 1.5 or newer. They also register Whitecap for supported archive
+MIME types in the file manager, including ACE and FreeArc. FreeArc extraction
+additionally requires the separate `unarc` executable on `PATH`.
+
+When an archive is open, drop files or folders onto its contents to add them
+to ZIP, 7z, or TAR archives (including compressed TAR variants). Dropped
+folders keep their folder names and internal paths. Whitecap does not modify
+RAR, ACE, or FreeArc archives; dropping items onto those archives displays a
+warning. Deletion is also supported for ZIP, 7z, and TAR archives and their
+compressed variants; RAR, ACE, and FreeArc remain read-only and display a
+warning if deletion is attempted. Deleting entries rebuilds TAR archives and
+compressed TAR archives, so large archives can take time and require temporary
+disk space. Existing archive paths are not overwritten.
+Adding to ZIP stages a copy of the archive; adding to TAR rebuilds it, and
+adding to 7z recompresses its existing entries. Large archive updates can take
+time and require additional temporary disk space.
 
 ## Project layout
 
 - `src/main.rs` starts the application.
-- `src/ui.rs` builds the GTK/libadwaita interface and wires its actions.
+- `src/ui/` contains the GTK/libadwaita window, actions, archive browsing,
+  drag-and-drop behavior, and shared UI state.
 - `src/archive/mod.rs` detects formats and dispatches archive operations.
 - `src/archive/zip.rs`, `tar.rs`, `rar.rs`, `sevenz.rs`, `ace.rs`, and
   `freearc.rs` handle their respective formats.

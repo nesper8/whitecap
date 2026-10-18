@@ -1,4 +1,6 @@
 mod ace;
+mod add;
+mod delete;
 mod path;
 mod rar;
 mod sevenz;
@@ -6,7 +8,7 @@ mod tar;
 mod zip;
 mod freearc;
 
-use std::{error::Error, io, path::Path};
+use std::{error::Error, io, path::{Path, PathBuf}};
 
 #[derive(Clone)]
 pub struct ArchiveEntry {
@@ -67,6 +69,24 @@ pub fn extract(
     }
 }
 
+pub fn add_files(archive_path: &Path, sources: &[PathBuf]) -> Result<usize, Box<dyn Error>> {
+    add::add_files(archive_path, sources)
+}
+
+pub fn supports_modification(path: &Path) -> Result<bool, io::Error> {
+    Ok(matches!(
+        archive_kind(path)?,
+        ArchiveKind::Zip | ArchiveKind::SevenZip | ArchiveKind::Tar(_)
+    ))
+}
+
+pub fn delete_entries(
+    archive_path: &Path,
+    selected: &[(String, bool)],
+) -> Result<usize, Box<dyn Error>> {
+    delete::delete_entries(archive_path, selected)
+}
+
 fn archive_kind(path: &Path) -> Result<ArchiveKind, io::Error> {
     let name = path
         .file_name()
@@ -123,5 +143,15 @@ mod tests {
             archive_kind(Path::new("archive.ACE")).unwrap(),
             ArchiveKind::Ace
         ));
+    }
+
+    #[test]
+    fn allows_modification_only_for_supported_writer_formats() {
+        for name in ["archive.zip", "archive.7z", "archive.tar", "archive.tar.gz"] {
+            assert!(supports_modification(Path::new(name)).unwrap(), "{name}");
+        }
+        for name in ["archive.rar", "archive.ace", "archive.arc"] {
+            assert!(!supports_modification(Path::new(name)).unwrap(), "{name}");
+        }
     }
 }

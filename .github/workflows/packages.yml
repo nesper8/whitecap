@@ -58,6 +58,8 @@ jobs:
           install -D -m 0755 target/release/whitecap "$package_root/usr/bin/whitecap"
           install -D -m 0644 packaging/io.github.whitecap.Archive.desktop \
             "$package_root/usr/share/applications/io.github.whitecap.Archive.desktop"
+          install -D -m 0644 packaging/io.github.whitecap.Archive-mime.xml \
+            "$package_root/usr/share/mime/packages/io.github.whitecap.Archive.xml"
           install -d "$package_root/DEBIAN"
           shlibdeps_root="$RUNNER_TEMP/whitecap-shlibdeps"
           install -d "$shlibdeps_root/debian"
@@ -85,10 +87,31 @@ jobs:
           Priority: optional
           Architecture: $ARCHITECTURE
           Maintainer: Whitecap contributors
-          Depends: $dependencies
+          Depends: $dependencies, desktop-file-utils, shared-mime-info
           Description: GTK archive browser for GNOME
            Browse and extract common archive formats with a GTK 4 and libadwaita interface.
           EOF
+          cat > "$package_root/DEBIAN/postinst" <<'EOF'
+          #!/bin/sh
+          set -e
+          if [ -x /usr/bin/update-mime-database ]; then
+            /usr/bin/update-mime-database /usr/share/mime
+          fi
+          if [ -x /usr/bin/update-desktop-database ]; then
+            /usr/bin/update-desktop-database /usr/share/applications
+          fi
+          EOF
+          cat > "$package_root/DEBIAN/postrm" <<'EOF'
+          #!/bin/sh
+          set -e
+          if [ -x /usr/bin/update-mime-database ]; then
+            /usr/bin/update-mime-database /usr/share/mime
+          fi
+          if [ -x /usr/bin/update-desktop-database ]; then
+            /usr/bin/update-desktop-database /usr/share/applications
+          fi
+          EOF
+          chmod 0755 "$package_root/DEBIAN/postinst" "$package_root/DEBIAN/postrm"
           mkdir -p dist
           dpkg-deb --root-owner-group --build "$package_root" \
             "dist/whitecap_${VERSION}_${ARCHITECTURE}.deb"
@@ -103,6 +126,8 @@ jobs:
           install -m 0755 target/release/whitecap "$rpm_root/SOURCES/whitecap"
           install -m 0644 packaging/io.github.whitecap.Archive.desktop \
             "$rpm_root/SOURCES/io.github.whitecap.Archive.desktop"
+          install -m 0644 packaging/io.github.whitecap.Archive-mime.xml \
+            "$rpm_root/SOURCES/io.github.whitecap.Archive-mime.xml"
           cat > "$rpm_root/SPECS/whitecap.spec" <<'EOF'
           Name:           whitecap
           Version:        %{version}
@@ -113,6 +138,8 @@ jobs:
           Requires:       glibc
           Requires:       gtk4 >= 4.10.0
           Requires:       libadwaita >= 1.5.0
+          Requires:       desktop-file-utils
+          Requires:       shared-mime-info
 
           %description
           Browse and extract common archive formats with a GTK 4 and libadwaita interface.
@@ -121,10 +148,21 @@ jobs:
           install -D -m 0755 %{_sourcedir}/whitecap %{buildroot}%{_bindir}/whitecap
           install -D -m 0644 %{_sourcedir}/io.github.whitecap.Archive.desktop \
             %{buildroot}%{_datadir}/applications/io.github.whitecap.Archive.desktop
+          install -D -m 0644 %{_sourcedir}/io.github.whitecap.Archive-mime.xml \
+            %{buildroot}%{_datadir}/mime/packages/io.github.whitecap.Archive.xml
+
+          %post
+          /usr/bin/update-mime-database /usr/share/mime || :
+          /usr/bin/update-desktop-database /usr/share/applications || :
+
+          %postun
+          /usr/bin/update-mime-database /usr/share/mime || :
+          /usr/bin/update-desktop-database /usr/share/applications || :
 
           %files
           %{_bindir}/whitecap
           %{_datadir}/applications/io.github.whitecap.Archive.desktop
+          %{_datadir}/mime/packages/io.github.whitecap.Archive.xml
           EOF
           rpmbuild --define "_topdir $rpm_root" --define "version $VERSION" \
             -bb "$rpm_root/SPECS/whitecap.spec"

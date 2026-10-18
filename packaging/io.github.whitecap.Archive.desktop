@@ -1,9 +1,10 @@
 [Desktop Entry]
 Name=Whitecap
 Comment=Browse and extract archives
-Exec=whitecap
+Exec=whitecap %F
 Icon=package-x-generic
 Terminal=false
 Type=Application
 Categories=Utility;Archiving;
+MimeType=application/zip;application/vnd.rar;application/x-7z-compressed;application/x-ace;application/x-freearc;application/x-tar;application/x-compressed-tar;application/x-bzip2-compressed-tar;application/x-xz-compressed-tar;application/x-zstd-compressed-tar;
 StartupNotify=true

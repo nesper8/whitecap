@@ -5,7 +5,7 @@ use std::{
     path::Path,
 };
 
-use super::{ArchiveEntry, path};
+use super::{ArchiveEntry, add::{self, SourceEntry}, delete, path};
 
 pub(super) fn load(path: &Path) -> Result<Vec<ArchiveEntry>, Box<dyn Error>> {
     let mut archive = ::zip::ZipArchive::new(File::open(path)?)?;
@@ -53,10 +53,62 @@ pub(super) fn extract(
     Ok(count)
 }
 
+pub(super) fn add(archive_path: &Path, additions: &[SourceEntry]) -> Result<(), Box<dyn Error>> {
+    let mut temporary = add::replacement_file(archive_path)?;
+    io::copy(&mut File::open(archive_path)?, temporary.as_file_mut())?;
+
+    let mut writer = ::zip::ZipWriter::new_append(temporary.reopen()?)?;
+    let options = ::zip::write::SimpleFileOptions::default();
+    for entry in additions {
+        if entry.is_dir {
+            writer.add_directory(
+                entry.archive_path.trim_end_matches('/'),
+                options,
+            )?;
+        } else {
+            writer.start_file(&entry.archive_path, options)?;
+            io::copy(&mut File::open(&entry.source)?, &mut writer)?;
+        }
+    }
+    writer.finish()?.flush()?;
+    temporary.persist(archive_path)?;
+    Ok(())
+}
+
+pub(super) fn delete(
+    archive_path: &Path,
+    selected: &[(String, bool)],
+) -> Result<usize, Box<dyn Error>> {
+    let temporary = add::replacement_file(archive_path)?;
+    let mut archive = ::zip::ZipArchive::new(File::open(archive_path)?)?;
+    let mut writer = ::zip::ZipWriter::new(temporary.reopen()?);
+    let mut count = 0;
+
+    for index in 0..archive.len() {
+        let entry = archive.by_index_raw(index)?;
+        let entry_path = path::normalize(entry.name());
+        if delete::is_selected(&entry_path, selected) {
+            count += 1;
+        } else {
+            writer.raw_copy_file(entry)?;
+        }
+    }
+    if count == 0 {
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            "None of the selected entries were found in the archive",
+        )
+        .into());
+    }
+    writer.finish()?.flush()?;
+    temporary.persist(archive_path)?;
+    Ok(count)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::archive::temporary_directory;
+    use crate::archive::{add_files, delete_entries, temporary_directory};
 
     #[test]
     fn extracts_only_selected_zip_directory() {
@@ -106,6 +158,62 @@ mod tests {
 
         assert!(!root.join("escaped.txt").exists());
         assert!(!destination.join("escaped.txt").exists());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn adds_dropped_folder_to_existing_zip() {
+        let root = temporary_directory();
+        let archive_path = root.join("sample.zip");
+        let file = File::create(&archive_path).unwrap();
+        let mut archive = ::zip::ZipWriter::new(file);
+        archive
+            .start_file("existing.txt", ::zip::write::SimpleFileOptions::default())
+            .unwrap();
+        archive.write_all(b"original").unwrap();
+        archive.finish().unwrap();
+
+        let source = root.join("docs");
+        fs::create_dir_all(source.join("nested")).unwrap();
+        fs::write(source.join("nested/readme.txt"), b"added").unwrap();
+        assert_eq!(
+            add_files(&archive_path, std::slice::from_ref(&source)).unwrap(),
+            3
+        );
+
+        let entries = load(&archive_path).unwrap();
+        assert!(entries.iter().any(|entry| entry.path == "existing.txt"));
+        assert!(entries.iter().any(|entry| entry.path == "docs/nested/readme.txt"));
+        let destination = root.join("output");
+        fs::create_dir_all(&destination).unwrap();
+        extract(&archive_path, &destination, &[]).unwrap();
+        assert_eq!(fs::read(destination.join("existing.txt")).unwrap(), b"original");
+        assert_eq!(
+            fs::read(destination.join("docs/nested/readme.txt")).unwrap(),
+            b"added"
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn deletes_selected_zip_folder_and_preserves_other_entries() {
+        let root = temporary_directory();
+        let archive_path = root.join("sample.zip");
+        let file = File::create(&archive_path).unwrap();
+        let mut archive = ::zip::ZipWriter::new(file);
+        let options = ::zip::write::SimpleFileOptions::default();
+        archive.add_directory("docs/", options).unwrap();
+        archive.start_file("docs/readme.txt", options).unwrap();
+        archive.write_all(b"remove").unwrap();
+        archive.start_file("keep.txt", options).unwrap();
+        archive.write_all(b"keep").unwrap();
+        archive.finish().unwrap();
+
+        let selected = vec![("docs".to_owned(), true)];
+        assert_eq!(delete_entries(&archive_path, &selected).unwrap(), 2);
+        let entries = load(&archive_path).unwrap();
+        assert!(!entries.iter().any(|entry| entry.path.starts_with("docs")));
+        assert!(entries.iter().any(|entry| entry.path == "keep.txt"));
         fs::remove_dir_all(root).unwrap();
     }
 }

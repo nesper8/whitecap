@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-ace">
+    <comment>ACE archive</comment>
+    <glob pattern="*.ace"/>
+  </mime-type>
+  <mime-type type="application/x-freearc">
+    <comment>FreeArc archive</comment>
+    <glob pattern="*.arc"/>
+  </mime-type>
+</mime-info>

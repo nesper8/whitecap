@@ -58,6 +58,14 @@ jobs:
           install -D -m 0755 target/release/whitecap "$package_root/usr/bin/whitecap"
           install -D -m 0644 packaging/io.github.whitecap.Archive.desktop \
             "$package_root/usr/share/applications/io.github.whitecap.Archive.desktop"
+          install -D -m 0644 icons/32.png \
+            "$package_root/usr/share/icons/hicolor/32x32/apps/io.github.whitecap.Archive.png"
+          install -D -m 0644 icons/64.png \
+            "$package_root/usr/share/icons/hicolor/64x64/apps/io.github.whitecap.Archive.png"
+          install -D -m 0644 icons/128.png \
+            "$package_root/usr/share/icons/hicolor/128x128/apps/io.github.whitecap.Archive.png"
+          install -D -m 0644 icons/scalable.svg \
+            "$package_root/usr/share/icons/hicolor/scalable/apps/io.github.whitecap.Archive.svg"
           install -D -m 0644 packaging/io.github.whitecap.Archive-mime.xml \
             "$package_root/usr/share/mime/packages/io.github.whitecap.Archive.xml"
           install -d "$package_root/DEBIAN"
@@ -125,6 +133,10 @@ jobs:
           install -m 0755 target/release/whitecap "$rpm_root/SOURCES/whitecap"
           install -m 0644 packaging/io.github.whitecap.Archive.desktop \
             "$rpm_root/SOURCES/io.github.whitecap.Archive.desktop"
+          install -m 0644 icons/32.png "$rpm_root/SOURCES/io.github.whitecap.Archive-32.png"
+          install -m 0644 icons/64.png "$rpm_root/SOURCES/io.github.whitecap.Archive-64.png"
+          install -m 0644 icons/128.png "$rpm_root/SOURCES/io.github.whitecap.Archive-128.png"
+          install -m 0644 icons/scalable.svg "$rpm_root/SOURCES/io.github.whitecap.Archive-scalable.svg"
           install -m 0644 packaging/io.github.whitecap.Archive-mime.xml \
             "$rpm_root/SOURCES/io.github.whitecap.Archive-mime.xml"
           cat > "$rpm_root/SPECS/whitecap.spec" <<'EOF'
@@ -147,6 +159,14 @@ jobs:
           install -D -m 0755 %{_sourcedir}/whitecap %{buildroot}%{_bindir}/whitecap
           install -D -m 0644 %{_sourcedir}/io.github.whitecap.Archive.desktop \
             %{buildroot}%{_datadir}/applications/io.github.whitecap.Archive.desktop
+          install -D -m 0644 %{_sourcedir}/io.github.whitecap.Archive-32.png \
+            %{buildroot}%{_datadir}/icons/hicolor/32x32/apps/io.github.whitecap.Archive.png
+          install -D -m 0644 %{_sourcedir}/io.github.whitecap.Archive-64.png \
+            %{buildroot}%{_datadir}/icons/hicolor/64x64/apps/io.github.whitecap.Archive.png
+          install -D -m 0644 %{_sourcedir}/io.github.whitecap.Archive-128.png \
+            %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/io.github.whitecap.Archive.png
+          install -D -m 0644 %{_sourcedir}/io.github.whitecap.Archive-scalable.svg \
+            %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/io.github.whitecap.Archive.svg
           install -D -m 0644 %{_sourcedir}/io.github.whitecap.Archive-mime.xml \
             %{buildroot}%{_datadir}/mime/packages/io.github.whitecap.Archive.xml
 
@@ -161,6 +181,10 @@ jobs:
           %files
           %{_bindir}/whitecap
           %{_datadir}/applications/io.github.whitecap.Archive.desktop
+          %{_datadir}/icons/hicolor/32x32/apps/io.github.whitecap.Archive.png
+          %{_datadir}/icons/hicolor/64x64/apps/io.github.whitecap.Archive.png
+          %{_datadir}/icons/hicolor/128x128/apps/io.github.whitecap.Archive.png
+          %{_datadir}/icons/hicolor/scalable/apps/io.github.whitecap.Archive.svg
           %{_datadir}/mime/packages/io.github.whitecap.Archive.xml
           EOF
           rpmbuild --define "_topdir $rpm_root" --define "version $VERSION" \

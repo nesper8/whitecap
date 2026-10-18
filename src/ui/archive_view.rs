@@ -128,6 +128,7 @@ pub(super) fn show_archive(
     title.set_text(&file_name);
     extract_button.set_sensitive(true);
     stack.set_visible_child_name("contents");
+    list.grab_focus();
 }
 
 pub(super) fn refresh_archive(

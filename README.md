@@ -37,6 +37,7 @@ cargo run
 
 The GitHub Actions workflow builds `.deb` and `.rpm` packages on pushes, pull
 requests, and manual runs. Download them from the run's **Artifacts** section.
+Pushing a `v*` tag also publishes a GitHub Release with both packages attached.
 The packages install Whitecap and its desktop launcher, and require GTK 4.10
 and libadwaita 1.5 or newer. They also register Whitecap for supported archive
 MIME types in the file manager, including ACE and FreeArc. FreeArc extraction

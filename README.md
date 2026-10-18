@@ -58,8 +58,9 @@ time and require additional temporary disk space.
 ## Project layout
 
 - `src/main.rs` starts the application.
-- `src/ui/` contains the GTK/libadwaita window, actions, archive browsing,
-  drag-and-drop behavior, and shared UI state.
+- `src/ui/` contains the GTK/libadwaita window, separate open/archive actions,
+  archive listing and row rendering, drag-and-drop handling, and shared UI
+  state.
 - `src/archive/mod.rs` exposes the archive API; `format.rs` detects formats
   and `operations.rs` dispatches archive operations.
 - `src/archive/zip.rs`, `tar.rs`, `rar.rs`, `sevenz.rs`, `ace.rs`, and

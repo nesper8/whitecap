@@ -1,5 +1,8 @@
 mod actions;
+mod archive_contents;
+mod archive_row;
 mod archive_view;
+mod drop_transport;
 mod drag_drop;
 mod helpers;
 mod state;

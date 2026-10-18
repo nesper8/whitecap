@@ -4,11 +4,7 @@ use adw::prelude::*;
 
 use crate::archive::ArchiveEntry;
 
-use super::{
-    drag_drop,
-    helpers::{format_size, show_error},
-    state::SharedState,
-};
+use super::{archive_contents::entries_in_directory, archive_row::archive_entry_row, state::SharedState};
 
 pub(super) fn show_archive(
     path: &Path,
@@ -91,45 +87,6 @@ fn render_directory(
     state.borrow_mut().visible_entries = visible_entries;
 }
 
-fn entries_in_directory(entries: &[ArchiveEntry], directory: &str) -> Vec<ArchiveEntry> {
-    use std::collections::BTreeMap;
-
-    let prefix = if directory.is_empty() {
-        String::new()
-    } else {
-        format!("{directory}/")
-    };
-    let mut children = BTreeMap::<String, ArchiveEntry>::new();
-
-    for entry in entries {
-        let Some(remainder) = entry.path.strip_prefix(&prefix) else {
-            continue;
-        };
-        if remainder.is_empty() {
-            continue;
-        }
-        if let Some((child_name, _)) = remainder.split_once('/') {
-            let child_path = format!("{prefix}{child_name}");
-            children.entry(child_path.clone()).or_insert(ArchiveEntry {
-                path: child_path,
-                is_dir: true,
-                size: 0,
-            });
-        } else {
-            children.insert(entry.path.clone(), entry.clone());
-        }
-    }
-
-    let mut children = children.into_values().collect::<Vec<_>>();
-    children.sort_by(|left, right| {
-        right
-            .is_dir
-            .cmp(&left.is_dir)
-            .then_with(|| left.path.to_lowercase().cmp(&right.path.to_lowercase()))
-    });
-    children
-}
-
 pub(super) fn connect_up_action(
     button: &gtk::Button,
     state: &SharedState,
@@ -205,103 +162,4 @@ pub(super) fn connect_row_activation(
             &archive_name,
         );
     });
-}
-
-fn archive_entry_row(
-    index: usize,
-    entry: &ArchiveEntry,
-    state: &SharedState,
-    list: &gtk::ListBox,
-) -> gtk::ListBoxRow {
-    let row = gtk::ListBoxRow::new();
-    row.set_widget_name(&format!("archive-entry-{index}"));
-    let line = gtk::Box::new(gtk::Orientation::Horizontal, 12);
-    line.set_margin_start(12);
-    line.set_margin_end(12);
-    line.set_margin_top(8);
-    line.set_margin_bottom(8);
-
-    let icon = gtk::Image::from_icon_name(if entry.is_dir {
-        "folder-symbolic"
-    } else {
-        "text-x-generic-symbolic"
-    });
-    let name = gtk::Label::new(Some(
-        Path::new(&entry.path)
-            .file_name()
-            .and_then(|name| name.to_str())
-            .unwrap_or(&entry.path),
-    ));
-    name.set_xalign(0.0);
-    name.set_ellipsize(gtk::pango::EllipsizeMode::Middle);
-    name.set_hexpand(true);
-    let size_text = if entry.is_dir {
-        String::new()
-    } else {
-        format_size(entry.size)
-    };
-    let size = gtk::Label::new(Some(&size_text));
-    size.add_css_class("dim-label");
-    line.append(&icon);
-    line.append(&name);
-    line.append(&size);
-    row.set_child(Some(&line));
-
-    let drag_source = gtk::DragSource::new();
-    drag_source.set_actions(gtk::gdk::DragAction::COPY);
-    drag_source.connect_prepare({
-        let state = state.clone();
-        let list = list.clone();
-        move |_, _, _| {
-            let export = match drag_drop::create_drag_export(&state, &list, index) {
-                Ok(export) => export,
-                Err(error) => {
-                    if let Some(overlay) = &state.borrow().toast_overlay {
-                        show_error(overlay, error);
-                    }
-                    return None;
-                }
-            };
-            Some(export)
-        }
-    });
-    row.add_controller(drag_source);
-    row
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn archive_contents_are_grouped_into_immediate_children() {
-        let entries = vec![
-            ArchiveEntry {
-                path: "project/src/main.rs".to_owned(),
-                is_dir: false,
-                size: 120,
-            },
-            ArchiveEntry {
-                path: "project/README.md".to_owned(),
-                is_dir: false,
-                size: 80,
-            },
-            ArchiveEntry {
-                path: "LICENSE".to_owned(),
-                is_dir: false,
-                size: 40,
-            },
-        ];
-
-        let root = entries_in_directory(&entries, "");
-        assert_eq!(root.len(), 2);
-        assert_eq!(root[0].path, "project");
-        assert!(root[0].is_dir);
-        assert_eq!(root[1].path, "LICENSE");
-
-        let project = entries_in_directory(&entries, "project");
-        assert_eq!(project.len(), 2);
-        assert_eq!(project[0].path, "project/src");
-        assert_eq!(project[1].path, "project/README.md");
-    }
 }

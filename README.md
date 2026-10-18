@@ -37,7 +37,8 @@ cargo run
 
 The GitHub Actions workflow builds `.deb` and `.rpm` packages on pushes, pull
 requests, and manual runs. Download them from the run's **Artifacts** section.
-Pushing a `v*` tag also publishes a GitHub Release with both packages attached.
+Successful builds on the default branch publish prereleases with both packages
+attached; pushing a `v*` tag publishes a versioned release.
 The packages install Whitecap and its desktop launcher, and require GTK 4.10
 and libadwaita 1.5 or newer. They also register Whitecap for all supported
 archive MIME types in the file manager. FreeArc extraction additionally

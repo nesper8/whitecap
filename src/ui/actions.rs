@@ -2,7 +2,7 @@
 
 #[path = "archive_actions.rs"]
 mod archive_actions;
-#[path = "open_actions.rs"]
+#[path = "open_actions/mod.rs"]
 mod open_actions;
 
 pub(super) use archive_actions::connect_delete_action;

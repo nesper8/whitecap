@@ -59,7 +59,24 @@ jobs:
           install -D -m 0644 packaging/io.github.whitecap.Archive.desktop \
             "$package_root/usr/share/applications/io.github.whitecap.Archive.desktop"
           install -d "$package_root/DEBIAN"
-          dependencies="$(dpkg-shlibdeps -O -e target/release/whitecap)"
+          shlibdeps_root="$RUNNER_TEMP/whitecap-shlibdeps"
+          install -d "$shlibdeps_root/debian"
+          cat > "$shlibdeps_root/debian/control" <<'EOF'
+          Source: whitecap
+          Section: utils
+          Priority: optional
+          Maintainer: Whitecap contributors
+          Standards-Version: 4.6.2
+
+          Package: whitecap
+          Architecture: any
+          Description: GTK archive browser for GNOME
+           Browse and extract common archive formats with a GTK 4 and libadwaita interface.
+          EOF
+          dependencies="$(
+            cd "$shlibdeps_root"
+            dpkg-shlibdeps -O -e "$GITHUB_WORKSPACE/target/release/whitecap"
+          )"
           dependencies="${dependencies#shlibs:Depends=}"
           cat > "$package_root/DEBIAN/control" <<EOF
           Package: whitecap

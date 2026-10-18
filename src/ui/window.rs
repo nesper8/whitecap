@@ -40,10 +40,11 @@ pub(super) fn build_window(app: &adw::Application, initial_archive: Option<PathB
     let toolbar = gtk::Box::new(gtk::Orientation::Vertical, 0);
 
     let location_bar = gtk::Box::new(gtk::Orientation::Horizontal, 12);
-    location_bar.set_margin_start(24);
-    location_bar.set_margin_end(24);
-    location_bar.set_margin_top(16);
-    location_bar.set_margin_bottom(12);
+    location_bar.set_margin_start(8);
+    location_bar.set_margin_end(8);
+    location_bar.set_margin_top(8);
+    location_bar.set_margin_bottom(8);
+    location_bar.set_height_request(56);
     let up_button = gtk::Button::from_icon_name("go-up-symbolic");
     up_button.set_tooltip_text(Some("Go to parent folder"));
     up_button.set_sensitive(false);
@@ -57,8 +58,8 @@ pub(super) fn build_window(app: &adw::Application, initial_archive: Option<PathB
     toolbar.append(&row_separator);
 
     let action_bar = gtk::Box::new(gtk::Orientation::Horizontal, 12);
-    action_bar.set_margin_start(24);
-    action_bar.set_margin_end(24);
+    action_bar.set_margin_start(8);
+    action_bar.set_margin_end(8);
     action_bar.set_margin_top(8);
     action_bar.set_margin_bottom(8);
     action_bar.append(&up_button);
@@ -98,8 +99,8 @@ pub(super) fn build_window(app: &adw::Application, initial_archive: Option<PathB
     list.set_selection_mode(gtk::SelectionMode::Multiple);
     list.set_activate_on_single_click(false);
     list.add_css_class("boxed-list");
-    list.set_margin_start(18);
-    list.set_margin_end(18);
+    list.set_margin_start(8);
+    list.set_margin_end(8);
     list.set_margin_top(18);
     list.set_margin_bottom(18);
     list.set_filter_func({
@@ -185,7 +186,7 @@ pub(super) fn build_window(app: &adw::Application, initial_archive: Option<PathB
     archive_view::connect_up_action(&up_button, &state, &list, &archive_label);
     archive_view::connect_row_activation(&list, &state, &list, &archive_label, &up_button);
     drag_drop::connect_archive_drop(
-        &archive_label,
+        &location_bar,
         &window,
         &overlay,
         &state,

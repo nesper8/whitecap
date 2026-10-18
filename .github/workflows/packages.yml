@@ -1,0 +1,122 @@
+name: Build Linux packages
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "v*"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Build ${{ matrix.format }} package
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - format: deb
+          - format: rpm
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes build-essential dpkg-dev libgtk-4-dev libadwaita-1-dev pkg-config rpm
+
+      - name: Run tests
+        run: cargo test --locked
+
+      - name: Build release binary
+        run: cargo build --release --locked
+
+      - name: Set package metadata
+        id: package
+        run: |
+          version="$(cargo metadata --no-deps --format-version 1 | python3 -c 'import json,sys; print(json.load(sys.stdin)["packages"][0]["version"])')"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "architecture=$(dpkg --print-architecture)" >> "$GITHUB_OUTPUT"
+
+      - name: Build Debian package
+        if: matrix.format == 'deb'
+        env:
+          VERSION: ${{ steps.package.outputs.version }}
+          ARCHITECTURE: ${{ steps.package.outputs.architecture }}
+        run: |
+          package_root="$RUNNER_TEMP/whitecap-deb"
+          install -D -m 0755 target/release/whitecap "$package_root/usr/bin/whitecap"
+          install -D -m 0644 packaging/io.github.whitecap.Archive.desktop \
+            "$package_root/usr/share/applications/io.github.whitecap.Archive.desktop"
+          install -d "$package_root/DEBIAN"
+          dependencies="$(dpkg-shlibdeps -O -e target/release/whitecap)"
+          dependencies="${dependencies#shlibs:Depends=}"
+          cat > "$package_root/DEBIAN/control" <<EOF
+          Package: whitecap
+          Version: $VERSION
+          Section: utils
+          Priority: optional
+          Architecture: $ARCHITECTURE
+          Maintainer: Whitecap contributors
+          Depends: $dependencies
+          Description: GTK archive browser for GNOME
+           Browse and extract common archive formats with a GTK 4 and libadwaita interface.
+          EOF
+          mkdir -p dist
+          dpkg-deb --root-owner-group --build "$package_root" \
+            "dist/whitecap_${VERSION}_${ARCHITECTURE}.deb"
+
+      - name: Build RPM package
+        if: matrix.format == 'rpm'
+        env:
+          VERSION: ${{ steps.package.outputs.version }}
+        run: |
+          rpm_root="$RUNNER_TEMP/whitecap-rpm"
+          mkdir -p "$rpm_root"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+          install -m 0755 target/release/whitecap "$rpm_root/SOURCES/whitecap"
+          install -m 0644 packaging/io.github.whitecap.Archive.desktop \
+            "$rpm_root/SOURCES/io.github.whitecap.Archive.desktop"
+          cat > "$rpm_root/SPECS/whitecap.spec" <<'EOF'
+          Name:           whitecap
+          Version:        %{version}
+          Release:        1%{?dist}
+          Summary:        GTK archive browser for GNOME
+          License:        Unknown
+          BuildArch:      x86_64
+          Requires:       glibc
+          Requires:       gtk4 >= 4.10.0
+          Requires:       libadwaita >= 1.5.0
+
+          %description
+          Browse and extract common archive formats with a GTK 4 and libadwaita interface.
+
+          %install
+          install -D -m 0755 %{_sourcedir}/whitecap %{buildroot}%{_bindir}/whitecap
+          install -D -m 0644 %{_sourcedir}/io.github.whitecap.Archive.desktop \
+            %{buildroot}%{_datadir}/applications/io.github.whitecap.Archive.desktop
+
+          %files
+          %{_bindir}/whitecap
+          %{_datadir}/applications/io.github.whitecap.Archive.desktop
+          EOF
+          rpmbuild --define "_topdir $rpm_root" --define "version $VERSION" \
+            -bb "$rpm_root/SPECS/whitecap.spec"
+          mkdir -p dist
+          find "$rpm_root/RPMS" -type f -name '*.rpm' -exec cp {} dist/ \;
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: whitecap-${{ matrix.format }}
+          path: dist/*
+          if-no-files-found: error

@@ -31,6 +31,14 @@ Install Rust and the GTK 4/libadwaita development packages, then run:
 cargo run
 ```
 
+## Linux packages
+
+The GitHub Actions workflow builds `.deb` and `.rpm` packages on pushes, pull
+requests, and manual runs. Download them from the run's **Artifacts** section.
+The packages install Whitecap and its desktop launcher, and require GTK 4.10
+and libadwaita 1.5 or newer. FreeArc extraction additionally requires the
+separate `unarc` executable on `PATH`.
+
 ## Project layout
 
 - `src/main.rs` starts the application.

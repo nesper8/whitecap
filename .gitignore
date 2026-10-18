@@ -1,1 +1,19 @@
-/target
+# Rust build output
+/target/
+
+# Generated distribution packages
+/dist/
+*.deb
+*.rpm
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Whitecap
+Comment=Browse and extract archives
+Exec=whitecap
+Icon=package-x-generic
+Terminal=false
+Type=Application
+Categories=Utility;Archiving;
+StartupNotify=true

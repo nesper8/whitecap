@@ -48,7 +48,7 @@ pub(super) fn build_window(app: &adw::Application, initial_archive: Option<PathB
     let up_button = gtk::Button::from_icon_name("go-up-symbolic");
     up_button.set_tooltip_text(Some("Go to parent folder"));
     up_button.set_sensitive(false);
-    let archive_label = gtk::Label::new(Some("Drop an archive here, or open one"));
+    let archive_label = gtk::Label::new(Some("Drop an archive here, or open one."));
     archive_label.set_xalign(0.0);
     archive_label.set_hexpand(true);
     archive_label.add_css_class("dim-label");
@@ -88,8 +88,9 @@ pub(super) fn build_window(app: &adw::Application, initial_archive: Option<PathB
         .title("Open an archive")
         .description(
             concat!(
-                "Drop an archive onto the location bar to open it. When open, ",
-                "drop files or folders into ZIP, 7z, or TAR archives to add them."
+                "Drop an archive onto the location bar to open it.\n\n",
+                "Editing and extraction: ZIP, 7z, and TAR.\n",
+                "Viewing and extraction only: RAR, ACE, and FreeArc."
             ),
         )
         .build();

@@ -12,15 +12,19 @@ extraction. Delete selected entries with the toolbar's trash button or the
 Delete key, then confirm the action. Selecting a folder removes its contents
 recursively.
 
-Supported formats:
+Supported formats
+
+Formats that support editing and extraction:
 
 - ZIP
-- RAR4 and RAR5
 - 7z
+- TAR, including gzip, bzip2, xz, and zstd compressed TAR archives
+
+Formats that support viewing and extraction only:
+
+- RAR4 and RAR5
 - ACE (`.ace`)
 - FreeArc (`.arc`; requires the `unarc` executable on `PATH`)
-- TAR
-- TAR compressed with gzip, bzip2, xz, or zstd
 
 When extracting from the Extract button, select one or more entries to extract
 only those items. Leave the selection empty to extract the full archive.

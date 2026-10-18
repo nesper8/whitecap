@@ -1,3 +1,5 @@
+//! Coordinates adding filesystem sources to writable archive formats.
+
 use std::{
     error::Error,
     io,
@@ -6,6 +8,11 @@ use std::{
 
 use super::{archive_kind, sources};
 
+/// Adds validated files or directories to a writable archive.
+///
+/// Existing entries are checked for direct and structural collisions before a
+/// format-specific rewrite begins. The returned count includes entries that
+/// were accepted for addition.
 pub(super) fn add_files(
     archive_path: &Path,
     sources: &[PathBuf],

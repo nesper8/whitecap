@@ -1,3 +1,8 @@
+//! Main-window construction and callback wiring.
+//!
+//! The window is intentionally assembled from small modules so widget layout,
+//! archive actions, and keyboard behavior can evolve independently.
+
 mod build_archive_controls;
 mod build_content_stack;
 mod build_header;

@@ -1,3 +1,5 @@
+//! Coordinates archive loading, directory navigation, and list rendering.
+
 use std::path::Path;
 
 use adw::prelude::*;
@@ -13,6 +15,7 @@ use super::{
     state::SharedState,
 };
 
+/// Starts loading an archive and handles a possible password retry.
 pub(super) fn open_archive(
     path: &Path,
     window: &adw::ApplicationWindow,
@@ -41,6 +44,7 @@ pub(super) fn open_archive(
 }
 
 #[allow(clippy::too_many_arguments)]
+/// Loads archive entries and retries through the password dialog when needed.
 fn load_archive(
     path: std::path::PathBuf,
     password: Option<String>,
@@ -98,6 +102,7 @@ fn load_archive(
     }
 }
 
+/// Stores a loaded archive in shared state and renders its root directory.
 pub(super) fn show_archive(
     path: &Path,
     entries: Vec<ArchiveEntry>,
@@ -131,6 +136,7 @@ pub(super) fn show_archive(
     list.grab_focus();
 }
 
+/// Replaces the current archive entries and redraws the visible directory.
 pub(super) fn refresh_archive(
     entries: Vec<ArchiveEntry>,
     state: &SharedState,
@@ -152,6 +158,7 @@ pub(super) fn refresh_archive(
     render_directory(state, list, archive_label, up_button, &archive_name);
 }
 
+/// Rebuilds the list rows and updates location and parent-folder controls.
 fn render_directory(
     state: &SharedState,
     list: &gtk::ListBox,
@@ -182,6 +189,7 @@ fn render_directory(
     state.borrow_mut().visible_entries = visible_entries;
 }
 
+/// Connects the parent-folder button to directory navigation.
 pub(super) fn connect_up_action(
     button: &gtk::Button,
     state: &SharedState,
@@ -213,6 +221,7 @@ pub(super) fn connect_up_action(
     });
 }
 
+/// Opens directory rows when the user activates them.
 pub(super) fn connect_row_activation(
     list: &gtk::ListBox,
     state: &SharedState,

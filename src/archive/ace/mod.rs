@@ -1,3 +1,10 @@
+//! ACE archive support.
+//!
+//! ACE archives are available for listing and extraction only. The submodules
+//! keep format validation, metadata loading, extraction, and error mapping
+//! separate while this module exposes the dispatch functions used by the
+//! archive layer.
+
 mod ensure_supported_archive;
 mod ensure_supported_entry;
 mod extract;
@@ -6,6 +13,7 @@ mod map_password_error;
 mod normalized_entry_path;
 mod safe_relative_path;
 
+/// Maximum uncompressed ACE entry size accepted during extraction.
 const MAX_ENTRY_SIZE: u64 = unarc_rs::DEFAULT_MAX_ENTRY_SIZE;
 
 pub(super) use extract::extract;

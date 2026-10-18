@@ -1,3 +1,5 @@
+//! Adds collected sources to uncompressed or compressed TAR archives.
+
 use std::{error::Error, path::Path};
 
 use crate::archive::{rewrite, sources::SourceEntry};
@@ -9,6 +11,7 @@ use super::{
     compress_tar::compress_tar,
 };
 
+/// Rebuilds a TAR archive with existing and newly collected entries.
 pub(crate) fn add(
     archive_path: &Path,
     additions: &[SourceEntry],

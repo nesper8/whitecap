@@ -1,7 +1,10 @@
+//! Compresses an intermediate TAR stream with the selected codec.
+
 use std::{error::Error, fs::File, io, path::Path};
 
 use super::Compression;
 
+/// Compresses an uncompressed TAR file with the selected codec.
 pub(crate) fn compress_tar(
     source: &Path,
     output: File,

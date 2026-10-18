@@ -1,5 +1,8 @@
+//! Normalizes archive paths and evaluates directory selections.
+
 use std::path::{Component, Path};
 
+/// Normalizes an archive path to relative, forward-slash-separated components.
 pub(super) fn normalize(path: &str) -> String {
     Path::new(path)
         .components()
@@ -11,6 +14,7 @@ pub(super) fn normalize(path: &str) -> String {
         .join("/")
 }
 
+/// Tests a path against file and recursive directory selections.
 pub(super) fn is_selected(path: &str, selected: &[(String, bool)]) -> bool {
     selected.is_empty()
         || selected.iter().any(|(selected_path, is_dir)| {
@@ -18,6 +22,7 @@ pub(super) fn is_selected(path: &str, selected: &[(String, bool)]) -> bool {
         })
 }
 
+/// Returns whether `path` is a descendant of the selected directory.
 fn is_descendant(path: &str, directory: &str) -> bool {
     let directory = directory.trim_end_matches('/');
     path.strip_prefix(directory)

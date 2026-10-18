@@ -1,5 +1,8 @@
+//! Builds the welcome page and archive contents list stack.
+
 use adw::prelude::*;
 
+/// Builds the welcome page and the list used to display archive contents.
 pub(super) fn build_content_stack(search: &gtk::SearchEntry) -> (gtk::Stack, gtk::ListBox) {
     let stack = gtk::Stack::new();
     stack.set_transition_type(gtk::StackTransitionType::Crossfade);

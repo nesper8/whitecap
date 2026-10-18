@@ -1,6 +1,9 @@
+//! Presents the password prompt used for encrypted archives.
+
 use adw::prelude::*;
 use gtk::gio;
 
+/// Presents an archive password dialog and invokes `callback` with its result.
 pub(super) fn request_password(
     window: &adw::ApplicationWindow,
     message: &str,

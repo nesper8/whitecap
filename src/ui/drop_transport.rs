@@ -1,3 +1,5 @@
+//! Converts GTK drop events into lists of local filesystem paths.
+
 use std::{path::PathBuf, rc::Rc};
 
 use adw::prelude::*;
@@ -5,8 +7,10 @@ use gtk::{gdk, gio, glib};
 
 use super::helpers::show_error;
 
+/// Callback invoked with local paths recovered from a GTK drop.
 pub(super) type DropHandler = Rc<dyn Fn(Vec<PathBuf>)>;
 
+/// Installs asynchronous file and URI-list drop handling on a widget.
 pub(super) fn connect_file_drop(
     widget: &impl gtk::prelude::IsA<gtk::Widget>,
     overlay: adw::ToastOverlay,
@@ -60,6 +64,7 @@ pub(super) fn connect_file_drop(
     widget.add_controller(drop_target);
 }
 
+/// Reads a text URI list and forwards its local files to the drop handler.
 fn read_dropped_uri_list(drop: &gdk::Drop, overlay: &adw::ToastOverlay, handler: &DropHandler) {
     let drop_to_finish = drop.clone();
     let overlay = overlay.clone();

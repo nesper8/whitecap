@@ -1,3 +1,5 @@
+//! Applies collision checks to collected archive sources.
+
 use std::io;
 
 use crate::archive::ArchiveEntry;

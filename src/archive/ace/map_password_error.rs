@@ -1,5 +1,8 @@
+//! Converts ACE library password failures into archive-layer errors.
+
 use std::error::Error;
 
+/// Distinguishes missing ACE passwords from rejected supplied passwords.
 pub(crate) fn map_password_error(
     error: unarc_rs::error::ArchiveError,
     password_was_provided: bool,

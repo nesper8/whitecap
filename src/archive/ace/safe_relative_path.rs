@@ -1,5 +1,10 @@
+//! Validates ACE entry paths before filesystem extraction.
+
 use std::{io, path::{Component, Path, PathBuf}};
 
+/// Converts an ACE name to a safe relative filesystem path.
+///
+/// Absolute paths, drive-prefixed names, and parent traversal are rejected.
 pub(crate) fn safe_relative_path(name: &str) -> io::Result<PathBuf> {
     let normalized = name.replace('\\', "/");
     let mut relative = PathBuf::new();

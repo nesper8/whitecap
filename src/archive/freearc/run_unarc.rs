@@ -1,9 +1,12 @@
+//! Executes `unarc` and normalizes process failures.
+
 use std::{
     error::Error,
     io,
     process::{Command, Output},
 };
 
+/// Runs a FreeArc command and reports missing executables or failed status.
 pub(crate) fn run_unarc(mut command: Command) -> Result<Output, Box<dyn Error>> {
     let output = command.output().map_err(|error| {
         if error.kind() == io::ErrorKind::NotFound {

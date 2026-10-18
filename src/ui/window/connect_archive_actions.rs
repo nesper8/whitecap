@@ -1,9 +1,12 @@
+//! Wires archive operations and drop targets to the constructed controls.
+
 use super::{
     build_archive_controls::ArchiveControls,
     build_header::HeaderWidgets,
 };
 use crate::ui::{actions, archive_view, drag_drop, state::SharedState};
 
+/// Wires archive operations and drop targets to the constructed controls.
 pub(super) fn connect_archive_actions(
     window: &adw::ApplicationWindow,
     overlay: &adw::ToastOverlay,

@@ -1,3 +1,9 @@
+//! Read-only FreeArc archive support.
+//!
+//! FreeArc relies on the external `unarc` executable. Listing and extraction
+//! are isolated from command execution, listing parsing, and path validation
+//! so unsafe archive names are rejected before extraction.
+
 mod absolute_path;
 mod entry;
 mod extract;

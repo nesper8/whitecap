@@ -1,7 +1,10 @@
+//! Rebuilds a ZIP archive without selected entries.
+
 use std::{error::Error, io, io::Write, path::Path};
 
 use crate::archive::{delete, path, rewrite};
 
+/// Rebuilds a ZIP archive without selected entries.
 pub(crate) fn delete(
     archive_path: &Path,
     selected: &[(String, bool)],

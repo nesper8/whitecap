@@ -1,3 +1,5 @@
+//! Safe temporary-file handling for archive rewrites.
+
 use std::{fs, io, path::Path};
 
 use tempfile::NamedTempFile;

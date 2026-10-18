@@ -1,7 +1,10 @@
+//! Writes collected files and directories into a TAR builder.
+
 use std::{error::Error, io::Write};
 
 use crate::archive::sources::SourceEntry;
 
+/// Appends validated files and directories to a TAR builder.
 pub(crate) fn append_source_entries<W: Write>(
     additions: &[SourceEntry],
     builder: &mut ::tar::Builder<W>,

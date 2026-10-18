@@ -1,7 +1,10 @@
+//! Copies existing TAR entries into a replacement archive.
+
 use std::{error::Error, io::Write, path::Path};
 
 use super::{Compression, reader::reader};
 
+/// Appends every entry from the original TAR stream to a builder.
 pub(crate) fn append_existing_entries<W: Write>(
     archive_path: &Path,
     compression: Compression,

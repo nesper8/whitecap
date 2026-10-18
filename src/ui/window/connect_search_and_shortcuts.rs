@@ -1,6 +1,9 @@
+//! Connects content filtering and keyboard selection shortcuts.
+
 use adw::prelude::*;
 use gtk::{gdk, glib};
 
+/// Connects search filtering and Ctrl+A list selection behavior.
 pub(super) fn connect_search_and_shortcuts(
     window: &adw::ApplicationWindow,
     search: &gtk::SearchEntry,

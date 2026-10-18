@@ -1,9 +1,12 @@
+//! Extracts selected 7z entries with optional password handling.
+
 use std::{error::Error, fs::{self, File}, io::{self, Write}, path::Path};
 
 use crate::archive::path;
 
 use super::map_password_error::map_password_error;
 
+/// Extracts selected 7z entries and preserves password error distinctions.
 pub(crate) fn extract(
     archive_path: &Path,
     destination: &Path,

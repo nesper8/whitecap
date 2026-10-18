@@ -1,3 +1,5 @@
+//! Connects archive-open and extraction actions to their GTK controls.
+
 use adw::prelude::*;
 use gtk::gio;
 
@@ -10,6 +12,7 @@ use crate::ui::{
     state::SharedState,
 };
 
+/// Connects the open button to the supported-archive file chooser.
 pub fn connect_open_action(
     button: &gtk::Button,
     window: &adw::ApplicationWindow,
@@ -79,6 +82,7 @@ pub fn connect_open_action(
     });
 }
 
+/// Connects the extract button to the destination-folder chooser.
 pub fn connect_extract_action(
     button: &gtk::Button,
     window: &adw::ApplicationWindow,
@@ -154,6 +158,7 @@ pub fn connect_extract_action(
     });
 }
 
+/// Extracts the current selection or asks for a missing archive password.
 fn extract_selected(
     window: adw::ApplicationWindow,
     overlay: adw::ToastOverlay,
@@ -214,6 +219,7 @@ fn extract_selected(
     }
 }
 
+/// Reopens the extraction flow after the user supplies a password.
 fn request_extract_password(
     window: adw::ApplicationWindow,
     overlay: adw::ToastOverlay,

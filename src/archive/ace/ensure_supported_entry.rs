@@ -1,5 +1,8 @@
+//! Checks whether an individual ACE entry can be processed safely.
+
 use std::io;
 
+/// Rejects ACE entries split across multiple archive volumes.
 pub(crate) fn ensure_supported_entry(
     header: &unarc_rs::ace::FileHeader,
 ) -> io::Result<()> {

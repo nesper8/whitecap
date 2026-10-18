@@ -1,3 +1,5 @@
+//! Extracts selected ZIP entries and maps encryption errors.
+
 use std::{
     error::Error,
     fs::{self, File},
@@ -9,6 +11,7 @@ use crate::archive::path;
 
 use super::map_password_error::map_password_error;
 
+/// Extracts selected ZIP entries while validating enclosed paths.
 pub(crate) fn extract(
     archive_path: &Path,
     destination: &Path,

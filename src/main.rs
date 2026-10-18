@@ -9,6 +9,7 @@
 mod archive;
 mod ui;
 
+/// Starts the GTK application and dispatches desktop file-open events.
 fn main() -> gtk::glib::ExitCode {
     ui::run()
 }

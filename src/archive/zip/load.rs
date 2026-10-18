@@ -1,7 +1,10 @@
+//! Loads normalized metadata from a ZIP archive.
+
 use std::{error::Error, fs::File, path::Path};
 
 use crate::archive::{ArchiveEntry, path};
 
+/// Loads normalized metadata for every ZIP entry.
 pub(crate) fn load(path: &Path) -> Result<Vec<ArchiveEntry>, Box<dyn Error>> {
     let mut archive = ::zip::ZipArchive::new(File::open(path)?)?;
     let mut entries = Vec::with_capacity(archive.len());

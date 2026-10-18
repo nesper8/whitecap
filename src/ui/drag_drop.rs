@@ -1,3 +1,5 @@
+//! Connects archive and filesystem drag-and-drop behavior to archive actions.
+
 use std::{
     error::Error,
     io,
@@ -17,6 +19,7 @@ use super::{
     state::SharedState,
 };
 
+/// Accepts an archive dropped on the location bar and opens it.
 pub(super) fn connect_archive_drop(
     address_bar: &impl gtk::prelude::IsA<gtk::Widget>,
     window: &adw::ApplicationWindow,
@@ -58,6 +61,7 @@ pub(super) fn connect_archive_drop(
     connect_file_drop(address_bar, drop_overlay, handler);
 }
 
+/// Accepts files dropped on the contents view and adds them to the archive.
 pub(super) fn connect_add_files_drop(
     contents: &impl gtk::prelude::IsA<gtk::Widget>,
     overlay: &adw::ToastOverlay,
@@ -128,6 +132,7 @@ pub(super) fn connect_add_files_drop(
     connect_file_drop(contents, drop_overlay, handler);
 }
 
+/// Routes a dropped archive to the archive-view loading flow.
 pub(super) fn load_dropped_archive(
     path: &Path,
     window: &adw::ApplicationWindow,
@@ -154,6 +159,7 @@ pub(super) fn load_dropped_archive(
     );
 }
 
+/// Extracts selected entries into a temporary directory for an external drag.
 pub(super) fn create_drag_export(
     state: &SharedState,
     list: &gtk::ListBox,

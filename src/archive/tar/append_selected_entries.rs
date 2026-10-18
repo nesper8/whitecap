@@ -1,9 +1,12 @@
+//! Copies only non-selected TAR entries during deletion.
+
 use std::{error::Error, io, io::Write, path::Path};
 
 use crate::archive::{delete, path};
 
 use super::{Compression, reader::reader};
 
+/// Copies entries not matched by the deletion selection into a builder.
 pub(crate) fn append_selected_entries<W: Write>(
     archive_path: &Path,
     compression: Compression,

@@ -1,14 +1,18 @@
+//! Collision index for existing and newly collected archive paths.
+
 use std::{collections::HashMap, io, path::Path};
 
 use crate::archive::ArchiveEntry;
 
 use super::source_entry::SourceEntry;
 
+/// Tracks archive paths and whether each path represents a directory.
 pub(crate) struct ArchiveIndex {
     entries: HashMap<String, bool>,
 }
 
 impl ArchiveIndex {
+    /// Builds an index from the entries already present in an archive.
     pub(crate) fn from_entries(entries: &[ArchiveEntry]) -> Self {
         Self {
             entries: entries
@@ -18,6 +22,7 @@ impl ArchiveIndex {
         }
     }
 
+    /// Adds one source entry after checking its parent and descendant paths.
     pub(crate) fn add(&mut self, entry: &SourceEntry) -> io::Result<()> {
         let archive_path = entry.archive_path.trim_end_matches('/');
         self.ensure_parent_directories_exist(archive_path)?;
@@ -32,6 +37,7 @@ impl ArchiveIndex {
         }
     }
 
+    /// Ensures no existing file blocks a source entry's parent directories.
     fn ensure_parent_directories_exist(&self, archive_path: &str) -> io::Result<()> {
         let mut parent = Path::new(archive_path).parent();
         while let Some(parent_path) = parent {
@@ -47,6 +53,7 @@ impl ArchiveIndex {
         Ok(())
     }
 
+    /// Prevents a new file from replacing an existing directory subtree.
     fn ensure_file_does_not_replace_directory(
         &self,
         archive_path: &str,
@@ -68,6 +75,7 @@ impl ArchiveIndex {
         Ok(())
     }
 
+    /// Creates the standard collision error for an existing archive path.
     fn existing_entry_error(archive_path: &str) -> io::Error {
         io::Error::new(
             io::ErrorKind::AlreadyExists,

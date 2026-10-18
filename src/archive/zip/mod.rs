@@ -1,3 +1,8 @@
+//! ZIP archive support for listing, extraction, and mutation.
+//!
+//! ZIP-specific operations are isolated in submodules while this module
+//! exposes the functions required by the archive dispatcher.
+
 mod add;
 mod delete;
 mod extract;

@@ -1,7 +1,10 @@
+//! Appends validated source entries to a ZIP archive.
+
 use std::{error::Error, fs::File, io, io::Write, path::Path};
 
 use crate::archive::{rewrite, sources::SourceEntry};
 
+/// Appends collected files and directories to a ZIP archive.
 pub(crate) fn add(archive_path: &Path, additions: &[SourceEntry]) -> Result<(), Box<dyn Error>> {
     let mut temporary = rewrite::replacement_file(archive_path)?;
     io::copy(&mut File::open(archive_path)?, temporary.as_file_mut())?;

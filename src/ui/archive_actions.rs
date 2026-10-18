@@ -1,3 +1,5 @@
+//! Connects archive mutation actions such as delete and navigation refresh.
+
 use adw::prelude::*;
 use gtk::{gio, glib};
 
@@ -5,6 +7,7 @@ use crate::archive;
 
 use crate::ui::{archive_view, helpers::{show_error, show_warning}, state::SharedState};
 
+/// Connects the delete button and keyboard shortcut to archive deletion.
 pub fn connect_delete_action(
     button: &gtk::Button,
     window: &adw::ApplicationWindow,

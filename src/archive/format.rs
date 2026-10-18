@@ -1,3 +1,5 @@
+//! Detects archive formats and TAR compression from file names.
+
 use std::{io, path::Path};
 
 #[derive(Clone, Copy)]
@@ -6,15 +8,22 @@ use std::{io, path::Path};
 /// The enum carries TAR compression because TAR is a container format whose
 /// reader and writer must be selected independently of the `.tar` family.
 pub(super) enum ArchiveKind {
+    /// ZIP archive.
     Zip,
+    /// TAR archive with its selected compression codec.
     Tar(super::tar::Compression),
+    /// 7z archive.
     SevenZip,
+    /// RAR archive.
     Rar,
+    /// FreeArc archive.
     FreeArc,
+    /// ACE archive.
     Ace,
 }
 
 impl ArchiveKind {
+    /// Returns whether this format supports Whitecap's mutation operations.
     pub(super) fn supports_modification(self) -> bool {
         matches!(
             self,
@@ -23,6 +32,10 @@ impl ArchiveKind {
     }
 }
 
+/// Infers an archive format from the path's case-insensitive filename suffix.
+///
+/// TAR variants carry their decoder choice in the returned value. The archive
+/// contents are not inspected by this function.
 pub(super) fn archive_kind(path: &Path) -> Result<ArchiveKind, io::Error> {
     let name = path
         .file_name()

@@ -1,7 +1,12 @@
+//! Recursively validates and collects one filesystem item.
+
 use std::{fs, io, path::Path};
 
 use super::source_entry::SourceEntry;
 
+/// Recursively collects one file or directory into archive-relative entries.
+///
+/// Symbolic links and unsupported filesystem item types are rejected.
 pub(crate) fn collect_entry(
     source: &Path,
     archive_path: String,

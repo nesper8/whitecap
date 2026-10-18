@@ -1,3 +1,5 @@
+//! Public archive-operation dispatch and format-independent behavior.
+
 use std::{
     error::Error,
     io,

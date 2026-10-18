@@ -1,5 +1,8 @@
+//! Rejects absolute and traversal paths reported by FreeArc.
+
 use std::{io, path::{Component, Path}};
 
+/// Rejects FreeArc paths that could escape the extraction directory.
 pub(crate) fn validate_relative_path(path: &str) -> Result<(), io::Error> {
     let normalized = path.replace('\\', "/");
     let path = Path::new(&normalized);

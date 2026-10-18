@@ -1,9 +1,12 @@
+//! Extracts selected entries from TAR-family archives.
+
 use std::{error::Error, path::Path};
 
 use crate::archive::path;
 
 use super::{Compression, reader::reader};
 
+/// Extracts selected entries from a TAR stream.
 pub(crate) fn extract(
     archive_path: &Path,
     destination: &Path,

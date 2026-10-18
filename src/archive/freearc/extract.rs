@@ -1,3 +1,5 @@
+//! Extracts selected entries through the external FreeArc `unarc` tool.
+
 use std::{error::Error, fs, io, path::Path, process::Command};
 
 use crate::archive::path;
@@ -8,6 +10,7 @@ use super::{
     validate_relative_path::validate_relative_path,
 };
 
+/// Extracts all or selected FreeArc entries after path validation.
 pub(crate) fn extract(
     archive_path: &Path,
     destination: &Path,

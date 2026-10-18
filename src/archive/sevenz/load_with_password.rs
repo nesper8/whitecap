@@ -1,9 +1,12 @@
+//! Loads 7z metadata and detects archive encryption.
+
 use std::{error::Error, path::Path};
 
 use crate::archive::{ArchiveEntry, path};
 
 use super::map_password_error::map_password_error;
 
+/// Loads 7z metadata using an optional password.
 pub(crate) fn load_with_password(
     path: &Path,
     password: Option<&str>,

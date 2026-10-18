@@ -1,3 +1,9 @@
+//! Shared source collection and collision validation for archive writers.
+//!
+//! Source paths are converted to archive-relative names, traversed in stable
+//! order, and rejected when they are symbolic links, unsupported filesystem
+//! items, or conflicts with entries already present in an archive.
+
 mod archive_index;
 mod collect_entry;
 mod collect_sources;

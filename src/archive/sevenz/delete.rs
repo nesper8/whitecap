@@ -1,7 +1,10 @@
+//! Rebuilds a 7z archive without selected entries.
+
 use std::{error::Error, io, io::Write, path::Path};
 
 use crate::archive::{delete, path, rewrite};
 
+/// Rewrites a 7z archive while omitting selected entries.
 pub(crate) fn delete(
     archive_path: &Path,
     selected: &[(String, bool)],

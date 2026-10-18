@@ -1,3 +1,5 @@
+//! Extracts selected entries from ACE archives.
+
 use std::{error::Error, fs, io, path::Path};
 
 use unarc_rs::ace::AceArchive;
@@ -13,6 +15,7 @@ use super::{
     safe_relative_path::safe_relative_path,
 };
 
+/// Extracts selected ACE entries after validating their paths and features.
 pub(crate) fn extract(
     archive_path: &Path,
     destination: &Path,

@@ -1,3 +1,5 @@
+//! Error types for archive password handling.
+
 use std::{error::Error, fmt};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

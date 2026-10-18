@@ -1,3 +1,8 @@
+//! 7z archive support for listing, extraction, and mutation.
+//!
+//! The format-specific operations are split into independent modules while
+//! this module preserves the small API used by the archive dispatcher.
+
 mod add;
 mod delete;
 mod extract;

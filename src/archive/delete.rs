@@ -1,7 +1,13 @@
+//! Coordinates deletion of selected entries from writable archives.
+
 use std::{error::Error, io, path::Path};
 
 use super::{archive_kind, path};
 
+/// Removes the selected entries from a writable archive.
+///
+/// The format implementation rebuilds the archive through a sibling
+/// temporary file and only replaces the original after a successful write.
 pub(super) fn delete_entries(
     archive_path: &Path,
     selected: &[(String, bool)],
@@ -35,6 +41,8 @@ pub(super) fn delete_entries(
     }
 }
 
+/// Returns whether an archive entry is directly selected or below a selected
+/// directory.
 pub(super) fn is_selected(entry_path: &str, selected: &[(String, bool)]) -> bool {
     path::is_selected(entry_path, selected)
 }

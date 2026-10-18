@@ -1,3 +1,5 @@
+//! Collects top-level filesystem sources for archive writers.
+
 use std::{io, path::PathBuf};
 
 use super::{collect_entry::collect_entry, source_entry::SourceEntry};

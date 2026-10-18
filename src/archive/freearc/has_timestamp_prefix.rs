@@ -1,3 +1,6 @@
+//! Recognizes timestamp-prefixed rows in FreeArc listings.
+
+/// Returns whether a listing line begins with FreeArc's timestamp columns.
 pub(crate) fn has_timestamp_prefix(line: &str) -> bool {
     let bytes = line.as_bytes();
     bytes.len() >= 31

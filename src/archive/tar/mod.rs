@@ -1,3 +1,9 @@
+//! TAR and compressed-TAR archive support.
+//!
+//! TAR uses a shared reader and separate rewrite paths for each compression
+//! variant. The public functions here are the format-dispatch boundary; the
+//! implementation details live in focused submodules.
+
 mod add;
 mod append_existing_entries;
 mod append_selected_entries;
@@ -9,11 +15,17 @@ mod load;
 mod reader;
 
 #[derive(Clone, Copy)]
+/// Compression codecs supported by TAR readers and writers.
 pub(super) enum Compression {
+    /// An uncompressed TAR stream.
     None,
+    /// Gzip-compressed TAR data.
     Gzip,
+    /// Bzip2-compressed TAR data.
     Bzip2,
+    /// XZ-compressed TAR data.
     Xz,
+    /// Zstandard-compressed TAR data.
     Zstd,
 }
 

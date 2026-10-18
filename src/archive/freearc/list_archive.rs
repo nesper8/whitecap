@@ -1,3 +1,5 @@
+//! Runs the FreeArc listing command and parses its output.
+
 use std::{error::Error, path::Path, process::Command};
 
 use super::{
@@ -7,6 +9,7 @@ use super::{
     run_unarc::run_unarc,
 };
 
+/// Lists an archive through `unarc` and parses its standard output.
 pub(crate) fn list_archive(archive_path: &Path) -> Result<Vec<ListedEntry>, Box<dyn Error>> {
     let mut command = Command::new("unarc");
     command

@@ -1,7 +1,10 @@
+//! Opens a TAR stream with its configured compression decoder.
+
 use std::{error::Error, fs::File, io::Read, path::Path};
 
 use super::Compression;
 
+/// Opens a TAR file through the decoder selected by its extension.
 pub(crate) fn reader(path: &Path, compression: Compression) -> Result<Box<dyn Read>, Box<dyn Error>> {
     let file = File::open(path)?;
     Ok(match compression {

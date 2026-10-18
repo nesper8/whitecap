@@ -1,9 +1,12 @@
+//! Parses structured entry rows emitted by FreeArc listings.
+
 use std::{error::Error, io};
 
 use crate::archive::{ArchiveEntry, path};
 
 use super::{entry::ListedEntry, has_timestamp_prefix::has_timestamp_prefix};
 
+/// Parses files and directories from `unarc l` output.
 pub(crate) fn parse_listing(output: &str) -> Result<Vec<ListedEntry>, Box<dyn Error>> {
     let mut entries = Vec::new();
     for line in output.lines() {

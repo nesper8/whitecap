@@ -1,3 +1,5 @@
+//! Removes selected entries while rebuilding a TAR archive.
+
 use std::{error::Error, io, path::Path};
 
 use crate::archive::rewrite;
@@ -8,6 +10,7 @@ use super::{
     compress_tar::compress_tar,
 };
 
+/// Rebuilds a TAR archive without the selected entries.
 pub(crate) fn delete(
     archive_path: &Path,
     selected: &[(String, bool)],

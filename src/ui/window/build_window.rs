@@ -1,3 +1,5 @@
+//! Assembles the main Whitecap window from focused UI components.
+
 use std::path::PathBuf;
 
 use adw::prelude::*;
@@ -11,6 +13,10 @@ use super::{
 };
 use crate::ui::{drag_drop, state::SharedState};
 
+/// Assembles and presents the main application window.
+///
+/// `initial_archive` is used when the desktop environment opens a file
+/// directly with Whitecap; `None` creates the empty welcome state.
 pub(crate) fn build_window(app: &adw::Application, initial_archive: Option<PathBuf>) {
     let state: SharedState = Default::default();
     let window = adw::ApplicationWindow::builder()

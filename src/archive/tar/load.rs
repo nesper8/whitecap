@@ -1,9 +1,12 @@
+//! Loads normalized metadata from TAR-family archives.
+
 use std::{error::Error, path::Path};
 
 use crate::archive::{ArchiveEntry, path};
 
 use super::{Compression, reader::reader};
 
+/// Loads normalized entry metadata from a TAR stream.
 pub(crate) fn load(
     path: &Path,
     compression: Compression,

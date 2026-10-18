@@ -1,3 +1,5 @@
+//! Constructs list rows for archive files and directories.
+
 use std::path::Path;
 
 use adw::prelude::*;
@@ -10,6 +12,7 @@ use super::{
     state::SharedState,
 };
 
+/// Builds a selectable row for one visible archive entry.
 pub(super) fn archive_entry_row(
     index: usize,
     entry: &ArchiveEntry,

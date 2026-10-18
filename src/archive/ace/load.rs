@@ -1,3 +1,5 @@
+//! Reads the entry metadata from an ACE archive.
+
 use std::{error::Error, fs::File, path::Path};
 
 use unarc_rs::ace::AceArchive;
@@ -10,6 +12,7 @@ use super::{
     normalized_entry_path::normalized_entry_path,
 };
 
+/// Lists ACE entries while preserving directory, size, and encryption metadata.
 pub(crate) fn load(path: &Path) -> Result<Vec<ArchiveEntry>, Box<dyn Error>> {
     let mut archive = AceArchive::new(File::open(path)?)?;
     ensure_supported_archive(&archive)?;

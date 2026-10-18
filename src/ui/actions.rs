@@ -1,3 +1,5 @@
+//! Re-exports the action wiring used by the main window.
+
 #[path = "archive_actions.rs"]
 mod archive_actions;
 #[path = "open_actions.rs"]

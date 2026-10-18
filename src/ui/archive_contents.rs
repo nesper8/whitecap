@@ -1,7 +1,11 @@
+//! Builds the immediate children visible for the current archive directory.
+
 use std::collections::BTreeMap;
 
 use crate::archive::ArchiveEntry;
 
+/// Returns the immediate children of `directory`, synthesizing folder rows
+/// when an archive omits explicit directory entries.
 pub(super) fn entries_in_directory(entries: &[ArchiveEntry], directory: &str) -> Vec<ArchiveEntry> {
     let prefix = if directory.is_empty() {
         String::new()

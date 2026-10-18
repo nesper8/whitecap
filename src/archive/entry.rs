@@ -1,3 +1,5 @@
+//! Metadata shared by all archive format readers.
+
 /// A single item reported by an archive reader.
 ///
 /// The path is normalized to use `/` separators and is relative to the root

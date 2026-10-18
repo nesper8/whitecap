@@ -1,7 +1,10 @@
+//! Appends validated source entries to a 7z archive.
+
 use std::{error::Error, fs::File, io::Write, path::Path};
 
 use crate::archive::{rewrite, sources::SourceEntry};
 
+/// Rewrites a 7z archive with its existing entries followed by additions.
 pub(crate) fn add(archive_path: &Path, additions: &[SourceEntry]) -> Result<(), Box<dyn Error>> {
     let temporary = rewrite::replacement_file(archive_path)?;
     let mut writer = sevenz_rust2::ArchiveWriter::create(temporary.path())?;

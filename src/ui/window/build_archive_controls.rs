@@ -1,14 +1,24 @@
+//! Builds the archive location, search, navigation, and delete controls.
+
 use adw::prelude::*;
 
+/// Widgets used by the archive location and contents action bars.
 pub(super) struct ArchiveControls {
+    /// Container holding the location and action rows.
     pub(super) toolbar: gtk::Box,
+    /// Drop target and archive location label.
     pub(super) location_bar: gtk::Box,
+    /// Label showing the archive and current directory.
     pub(super) archive_label: gtk::Label,
+    /// Button for navigating to the parent directory.
     pub(super) up_button: gtk::Button,
+    /// Contents search field.
     pub(super) search: gtk::SearchEntry,
+    /// Button for deleting selected entries.
     pub(super) delete_button: gtk::Button,
 }
 
+/// Constructs the archive location, search, navigation, and delete controls.
 pub(super) fn build_archive_controls() -> ArchiveControls {
     let toolbar = gtk::Box::new(gtk::Orientation::Vertical, 0);
 

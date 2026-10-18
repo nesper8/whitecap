@@ -1,6 +1,10 @@
 use std::{io, path::Path};
 
 #[derive(Clone, Copy)]
+/// Archive format selected from a filename extension.
+///
+/// The enum carries TAR compression because TAR is a container format whose
+/// reader and writer must be selected independently of the `.tar` family.
 pub(super) enum ArchiveKind {
     Zip,
     Tar(super::tar::Compression),

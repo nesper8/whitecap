@@ -2,6 +2,11 @@ use std::{fs, io, path::Path};
 
 use tempfile::NamedTempFile;
 
+/// Creates a sibling temporary file suitable for atomically rebuilding an archive.
+///
+/// The source archive must not be a symbolic link or read-only. The temporary
+/// file inherits the source archive's permissions and is left for the caller to
+/// persist only after the replacement archive has been fully written.
 pub(super) fn replacement_file(archive_path: &Path) -> io::Result<NamedTempFile> {
     if fs::symlink_metadata(archive_path)?.file_type().is_symlink() {
         return Err(io::Error::new(

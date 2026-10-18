@@ -1,3 +1,9 @@
+//! GTK application setup and UI orchestration.
+//!
+//! Widgets and callbacks live in focused submodules. The UI keeps the current
+//! archive, visible directory, password, and temporary drag-export files in a
+//! shared state object; archive format details remain in [`crate::archive`].
+
 mod actions;
 mod archive_contents;
 mod archive_row;
@@ -12,6 +18,11 @@ mod window;
 use adw::prelude::*;
 use gtk::{gio, glib};
 
+/// Builds and runs the Whitecap application.
+///
+/// The application accepts archives opened by the desktop environment through
+/// its `HANDLES_OPEN` application flag and also supports opening an empty
+/// window when launched without a file.
 pub fn run() -> glib::ExitCode {
     let app = adw::Application::builder()
         .application_id("io.github.whitecap.Archive")

@@ -1,8 +1,11 @@
 use std::{error::Error, fmt};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Password state reported by an archive operation.
 pub enum PasswordError {
+    /// The archive requires a password and none was supplied.
     Required,
+    /// A supplied password was rejected by the archive.
     Invalid,
 }
 

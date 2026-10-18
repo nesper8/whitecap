@@ -7,12 +7,21 @@ use std::{
 
 use super::ArchiveEntry;
 
+/// A validated filesystem item prepared for an archive writer.
+///
+/// Directory paths include a trailing slash so format-specific writers can
+/// preserve explicit directory entries.
 pub(super) struct SourceEntry {
     pub(super) source: PathBuf,
     pub(super) archive_path: String,
     pub(super) is_dir: bool,
 }
 
+/// Collects files and directories in deterministic, archive-relative order.
+///
+/// Symbolic links and special filesystem items are rejected. Directory
+/// children are sorted by filename so repeated additions produce stable
+/// archive entry ordering.
 pub(super) fn collect_sources(sources: &[PathBuf]) -> Result<Vec<SourceEntry>, io::Error> {
     let mut entries = Vec::new();
     for source in sources {
@@ -74,6 +83,10 @@ fn collect_entry(
     Ok(())
 }
 
+/// Ensures additions cannot overwrite or conflict with existing archive paths.
+///
+/// This checks both direct collisions and structural conflicts, such as adding
+/// a file where an existing directory or parent path is required.
 pub(super) fn ensure_no_collisions(
     existing: &[ArchiveEntry],
     additions: &[SourceEntry],

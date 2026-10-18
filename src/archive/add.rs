@@ -25,10 +25,7 @@ pub(super) fn add_files(
     }
 
     let kind = archive_kind(archive_path)?;
-    if matches!(
-        kind,
-        super::ArchiveKind::Rar | super::ArchiveKind::Ace | super::ArchiveKind::FreeArc
-    ) {
+    if !kind.supports_modification() {
         return Err(io::Error::new(
             io::ErrorKind::Unsupported,
             "Adding files is disabled for RAR, ACE, and FreeArc archives because Whitecap does not modify these formats.",
@@ -58,13 +55,9 @@ pub(super) fn add_files(
             super::tar::add(archive_path, &entries, compression)?
         }
         super::ArchiveKind::SevenZip => super::sevenz::add(archive_path, &entries)?,
-        super::ArchiveKind::Rar | super::ArchiveKind::Ace | super::ArchiveKind::FreeArc => {
-            return Err(io::Error::new(
-                io::ErrorKind::Unsupported,
-                "Adding files is disabled for RAR, ACE, and FreeArc archives because Whitecap does not modify these formats.",
-            )
-            .into());
-        }
+        super::ArchiveKind::Rar | super::ArchiveKind::Ace | super::ArchiveKind::FreeArc => unreachable!(
+            "unsupported archive kinds are rejected before dispatch"
+        ),
     }
 
     Ok(count)

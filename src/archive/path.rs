@@ -14,13 +14,14 @@ pub(super) fn normalize(path: &str) -> String {
 pub(super) fn is_selected(path: &str, selected: &[(String, bool)]) -> bool {
     selected.is_empty()
         || selected.iter().any(|(selected_path, is_dir)| {
-            path == selected_path
-                || (*is_dir
-                    && path.starts_with(&format!(
-                        "{}/",
-                        selected_path.trim_end_matches('/')
-                    )))
+            path == selected_path || (*is_dir && is_descendant(path, selected_path))
         })
+}
+
+fn is_descendant(path: &str, directory: &str) -> bool {
+    let directory = directory.trim_end_matches('/');
+    path.strip_prefix(directory)
+        .is_some_and(|suffix| suffix.starts_with('/'))
 }
 
 #[cfg(test)]

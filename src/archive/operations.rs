@@ -49,10 +49,7 @@ pub fn add_files(archive_path: &Path, sources: &[PathBuf]) -> Result<usize, Box<
 }
 
 pub fn supports_modification(path: &Path) -> Result<bool, io::Error> {
-    Ok(matches!(
-        archive_kind(path)?,
-        ArchiveKind::Zip | ArchiveKind::SevenZip | ArchiveKind::Tar(_)
-    ))
+    Ok(archive_kind(path)?.supports_modification())
 }
 
 pub fn delete_entries(

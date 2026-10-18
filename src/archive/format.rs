@@ -10,12 +10,21 @@ pub(super) enum ArchiveKind {
     Ace,
 }
 
+impl ArchiveKind {
+    pub(super) fn supports_modification(self) -> bool {
+        matches!(
+            self,
+            Self::Zip | Self::Tar(_) | Self::SevenZip
+        )
+    }
+}
+
 pub(super) fn archive_kind(path: &Path) -> Result<ArchiveKind, io::Error> {
     let name = path
         .file_name()
         .and_then(|name| name.to_str())
         .unwrap_or_default()
-        .to_lowercase();
+        .to_ascii_lowercase();
     if name.ends_with(".zip") {
         Ok(ArchiveKind::Zip)
     } else if name.ends_with(".7z") {

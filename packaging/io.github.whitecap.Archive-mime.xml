@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/zip">
+    <comment>ZIP archive</comment>
+    <glob pattern="*.zip"/>
+  </mime-type>
+  <mime-type type="application/vnd.rar">
+    <comment>RAR archive</comment>
+    <glob pattern="*.rar"/>
+  </mime-type>
+  <mime-type type="application/x-7z-compressed">
+    <comment>7-Zip archive</comment>
+    <glob pattern="*.7z"/>
+  </mime-type>
   <mime-type type="application/x-ace">
     <comment>ACE archive</comment>
     <glob pattern="*.ace"/>
@@ -7,5 +19,29 @@
   <mime-type type="application/x-freearc">
     <comment>FreeArc archive</comment>
     <glob pattern="*.arc"/>
+  </mime-type>
+  <mime-type type="application/x-tar">
+    <comment>TAR archive</comment>
+    <glob pattern="*.tar"/>
+  </mime-type>
+  <mime-type type="application/x-compressed-tar">
+    <comment>Gzip-compressed TAR archive</comment>
+    <glob pattern="*.tar.gz"/>
+    <glob pattern="*.tgz"/>
+  </mime-type>
+  <mime-type type="application/x-bzip2-compressed-tar">
+    <comment>Bzip2-compressed TAR archive</comment>
+    <glob pattern="*.tar.bz2"/>
+    <glob pattern="*.tbz2"/>
+  </mime-type>
+  <mime-type type="application/x-xz-compressed-tar">
+    <comment>Xz-compressed TAR archive</comment>
+    <glob pattern="*.tar.xz"/>
+    <glob pattern="*.txz"/>
+  </mime-type>
+  <mime-type type="application/x-zstd-compressed-tar">
+    <comment>Zstandard-compressed TAR archive</comment>
+    <glob pattern="*.tar.zst"/>
+    <glob pattern="*.tzst"/>
   </mime-type>
 </mime-info>

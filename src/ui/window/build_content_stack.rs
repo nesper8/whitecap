@@ -2,6 +2,8 @@
 
 use adw::prelude::*;
 
+const CONTENT_MARGIN: i32 = 8;
+
 /// Builds the welcome page and the list used to display archive contents.
 pub(super) fn build_content_stack(search: &gtk::SearchEntry) -> (gtk::Stack, gtk::ListBox) {
     let stack = gtk::Stack::new();
@@ -26,10 +28,10 @@ pub(super) fn build_content_stack(search: &gtk::SearchEntry) -> (gtk::Stack, gtk
     list.set_selection_mode(gtk::SelectionMode::Multiple);
     list.set_activate_on_single_click(false);
     list.add_css_class("boxed-list");
-    list.set_margin_start(8);
-    list.set_margin_end(8);
-    list.set_margin_top(18);
-    list.set_margin_bottom(18);
+    list.set_margin_start(CONTENT_MARGIN);
+    list.set_margin_end(CONTENT_MARGIN);
+    list.set_margin_top(CONTENT_MARGIN);
+    list.set_margin_bottom(CONTENT_MARGIN);
     list.set_filter_func({
         let search = search.clone();
         move |row| {

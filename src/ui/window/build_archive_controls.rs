@@ -2,6 +2,8 @@
 
 use adw::prelude::*;
 
+const CONTROL_SPACING: i32 = 8;
+
 /// Widgets used by the archive location and contents action bars.
 pub(super) struct ArchiveControls {
     /// Container holding the location and action rows.
@@ -22,7 +24,7 @@ pub(super) struct ArchiveControls {
 pub(super) fn build_archive_controls() -> ArchiveControls {
     let toolbar = gtk::Box::new(gtk::Orientation::Vertical, 0);
 
-    let location_bar = gtk::Box::new(gtk::Orientation::Horizontal, 12);
+    let location_bar = gtk::Box::new(gtk::Orientation::Horizontal, CONTROL_SPACING);
     location_bar.set_margin_start(8);
     location_bar.set_margin_end(8);
     location_bar.set_margin_top(8);
@@ -36,7 +38,7 @@ pub(super) fn build_archive_controls() -> ArchiveControls {
     toolbar.append(&location_bar);
     toolbar.append(&gtk::Separator::new(gtk::Orientation::Horizontal));
 
-    let action_bar = gtk::Box::new(gtk::Orientation::Horizontal, 12);
+    let action_bar = gtk::Box::new(gtk::Orientation::Horizontal, CONTROL_SPACING);
     action_bar.set_margin_start(8);
     action_bar.set_margin_end(8);
     action_bar.set_margin_top(8);

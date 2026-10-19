@@ -76,8 +76,8 @@ entries and password-protected FreeArc archives are not currently supported.
   state.
 - `src/archive/mod.rs` exposes the archive API; `format.rs` detects formats
   and `operations.rs` dispatches archive operations.
-- `src/archive/zip.rs`, `tar.rs`, `rar.rs`, `sevenz.rs`, `ace.rs`, and
-  `freearc.rs` handle their respective formats.
+- `src/archive/zip/`, `tar/`, `rar/`, `sevenz/`, `ace/`, and `freearc/` handle
+  their respective formats.
 - `src/archive/path.rs` contains shared archive-path and selection helpers.
 
 FreeArc archives use the separately installed `unarc` extractor at runtime.

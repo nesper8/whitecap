@@ -26,6 +26,8 @@ Formats that support viewing and extraction only:
 - ACE (`.ace`)
 - FreeArc (`.arc`; requires the `unarc` executable on `PATH`)
 
+The location bar prefixes read-only archives with a 🔒 padlock.
+
 When extracting from the Extract button, select one or more entries to extract
 only those items. Leave the selection empty to extract the full archive.
 

@@ -1,5 +1,6 @@
 //! Archive loading, directory navigation, and list rendering.
 
+mod archive_name;
 mod connect_row_activation;
 mod connect_up_action;
 mod load_archive;

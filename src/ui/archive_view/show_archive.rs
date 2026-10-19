@@ -7,7 +7,7 @@ use adw::prelude::*;
 use crate::archive::ArchiveEntry;
 use crate::ui::state::SharedState;
 
-use super::render_directory::render_directory;
+use super::{archive_name, render_directory::render_directory};
 
 /// Stores a loaded archive in shared state and renders its root directory.
 pub(crate) fn show_archive(
@@ -22,11 +22,8 @@ pub(crate) fn show_archive(
     extract_button: &gtk::Button,
     up_button: &gtk::Button,
 ) {
-    let file_name = path
-        .file_name()
-        .and_then(|name| name.to_str())
-        .unwrap_or("Archive")
-        .to_owned();
+    let file_name = archive_name::file_name(path);
+    let location_name = archive_name::location_name(path);
     {
         let mut state = state.borrow_mut();
         state.archive_path = Some(path.to_path_buf());
@@ -40,7 +37,7 @@ pub(crate) fn show_archive(
         list,
         archive_label,
         up_button,
-        &file_name,
+        &location_name,
     );
 
     title.set_text(&file_name);

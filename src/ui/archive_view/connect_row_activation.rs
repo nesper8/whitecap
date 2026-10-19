@@ -4,6 +4,8 @@ use adw::prelude::*;
 
 use crate::ui::state::SharedState;
 
+use super::archive_name;
+
 /// Opens directory rows when the user activates them.
 pub(crate) fn connect_row_activation(
     list: &gtk::ListBox,
@@ -36,10 +38,8 @@ pub(crate) fn connect_row_activation(
         let archive_name = state_ref
             .archive_path
             .as_deref()
-            .and_then(std::path::Path::file_name)
-            .and_then(|name| name.to_str())
-            .unwrap_or("Archive")
-            .to_owned();
+            .map(archive_name::location_name)
+            .unwrap_or_else(|| "Archive".to_owned());
         drop(state_ref);
         super::render_directory::render_directory(
             &state,

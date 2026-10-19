@@ -1,10 +1,10 @@
 //! Connects the parent-directory navigation button.
 
-use std::path::Path;
-
 use adw::prelude::*;
 
 use crate::ui::state::SharedState;
+
+use super::archive_name;
 
 /// Connects the parent-folder button to directory navigation.
 pub(crate) fn connect_up_action(
@@ -22,10 +22,8 @@ pub(crate) fn connect_up_action(
             .borrow()
             .archive_path
             .as_deref()
-            .and_then(Path::file_name)
-            .and_then(|name| name.to_str())
-            .unwrap_or("Archive")
-            .to_owned();
+            .map(archive_name::location_name)
+            .unwrap_or_else(|| "Archive".to_owned());
         {
             let mut state = state.borrow_mut();
             if let Some((parent, _)) = state.current_directory.rsplit_once('/') {

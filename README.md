@@ -90,6 +90,18 @@ it is available on `PATH`.
 ACE support uses the `unarc-rs` library. Multi-volume ACE archives are not
 supported, and individual entries are limited to 1 GiB.
 
+## TO-DO
+
+# UI
+[] Make the address bar scrollable
+
+# Read + Write Support
+[] LHA and LZH archives
+[] ZIPX archives (with support for bzip2, zstd, ppmd8, lzma and xz compressed entries)
+
+# Read-only support
+[] ISO9660 CD-ROM images (with optional Rockridge or Joliet extensions)
+
 ## RAR library notice
 
 RAR support uses `unrar-rs`, which includes the following UnRAR source-code
